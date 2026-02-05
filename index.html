@@ -3,27 +3,119 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gästebuch Zugang</title>
+<title>Unser digitales Gästebuch</title>
+
 <style>
-body { font-family: system-ui; text-align:center; padding:40px; }
-img { width:220px; margin:20px; }
-h1 { margin-bottom:10px; }
-.box { margin:40px 0; }
+body{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto;
+    background: linear-gradient(180deg,#f7f8fb,#eef1f7);
+    text-align:center;
+    padding:40px 20px;
+    color:#1b1e28;
+}
+
+h1{
+    font-size:34px;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    opacity:.7;
+    margin-bottom:40px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    position:relative;
+}
+
+.step{
+    background:white;
+    border-radius:20px;
+    padding:30px;
+    margin:40px 0;
+    box-shadow:0 12px 30px rgba(0,0,0,0.06);
+}
+
+.qr{
+    width:220px;
+    margin:20px auto;
+}
+
+button{
+    background:#4b6cff;
+    color:white;
+    border:none;
+    padding:16px 28px;
+    font-size:18px;
+    border-radius:14px;
+    cursor:pointer;
+    margin-top:20px;
+    box-shadow:0 6px 20px rgba(75,108,255,.25);
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+/* Pfeile */
+.arrow{
+    position:absolute;
+    width:200px;
+    height:120px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.arrow svg{
+    width:100%;
+    height:100%;
+}
+
+.arrow path{
+    fill:none;
+    stroke:#4b6cff;
+    stroke-width:4;
+    stroke-dasharray:10;
+    animation:dash 4s linear infinite;
+}
+
+@keyframes dash{
+    to{ stroke-dashoffset:-200; }
+}
 </style>
 </head>
+
 <body>
 
 <h1>Unser digitales Gästebuch</h1>
-<p>1. Mit WLAN verbinden<br>2. Gästebuch öffnen</p>
-
-<div class="box">
-<h2>Gast-WLAN</h2>
-<img src="wifi-qr.png">
+<div class="subtitle">
+Scanne die Schritte oder nutze den Button
 </div>
 
-<div class="box">
-<h2>Gästebuch öffnen</h2>
-<img src="guestbook-qr.png">
+<div class="container">
+
+<div class="step">
+<h2>1. Mit Gast-WLAN verbinden</h2>
+<img src="wifi-qr.png" class="qr">
+</div>
+
+<div class="arrow" style="top:240px">
+<svg viewBox="0 0 200 120">
+<path d="M10,20 C60,120 140,0 190,100"/>
+</svg>
+</div>
+
+<div class="step">
+<h2>2. Gästebuch öffnen</h2>
+<img src="guestbook-qr.png" class="qr">
+<br>
+<a href="form.html">
+<button>Gästebuch direkt öffnen</button>
+</a>
+</div>
+
 </div>
 
 </body>
