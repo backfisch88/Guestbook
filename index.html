@@ -1,122 +1,375 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Unser digitales Gästebuch</title>
 
 <style>
-body{
-    font-family: system-ui, -apple-system, Segoe UI, Roboto;
-    background: linear-gradient(180deg,#f7f8fb,#eef1f7);
+  :root{
+    --agave:#2e5d50;
+    --gold:#c7a96b;
+    --ink:#1d2b27;
+    --bg1:#e7efe9;
+    --bg2:#f4f1ea;
+    --card:#ffffff;
+    --shadow: 0 14px 34px rgba(0,0,0,.06);
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    margin:0;
+    padding:40px 18px;
+    color:var(--ink);
+    background: linear-gradient(180deg,var(--bg1),var(--bg2));
     text-align:center;
-    padding:40px 20px;
-    color:#1b1e28;
-}
+  }
 
-h1{
-    font-size:34px;
-    margin-bottom:8px;
-}
+  .wrap{ max-width:920px; margin:0 auto; }
 
-.subtitle{
-    opacity:.7;
-    margin-bottom:40px;
-}
+  h1{ margin:0 0 8px; font-size:34px; letter-spacing:.2px; }
+  .subtitle{ opacity:.75; margin:0 0 28px; line-height:1.35; }
 
-.container{
-    max-width:900px;
-    margin:auto;
-    position:relative;
-}
+  .hero{
+    background: rgba(255,255,255,.55);
+    border: 1px solid rgba(255,255,255,.6);
+    border-radius: 26px;
+    padding: 18px 18px 22px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
 
-.step{
-    background:white;
-    border-radius:20px;
-    padding:30px;
-    margin:40px 0;
-    box-shadow:0 12px 30px rgba(0,0,0,0.06);
-}
+  /* “Slide to unlock” */
+  .sliderShell{
+    margin: 18px auto 6px;
+    max-width: 520px;
+    background: rgba(46,93,80,.10);
+    border: 1px solid rgba(46,93,80,.12);
+    border-radius: 999px;
+    padding: 10px;
+    position: relative;
+    overflow:hidden;
+  }
 
-.qr{
-    width:220px;
-    margin:20px auto;
-}
-
-button{
-    background:#4b6cff;
-    color:white;
-    border:none;
-    padding:16px 28px;
-    font-size:18px;
-    border-radius:14px;
-    cursor:pointer;
-    margin-top:20px;
-    box-shadow:0 6px 20px rgba(75,108,255,.25);
-}
-
-button:hover{
-    transform:translateY(-2px);
-}
-
-/* Pfeile */
-.arrow{
+  .shine{
     position:absolute;
-    width:200px;
-    height:120px;
-    left:50%;
-    transform:translateX(-50%);
-}
+    inset:-40px;
+    background: linear-gradient(110deg,
+      transparent 0%,
+      rgba(255,255,255,.22) 45%,
+      rgba(255,255,255,.06) 55%,
+      transparent 100%);
+    transform: translateX(-60%);
+    animation: shine 2.8s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes shine{
+    0%{ transform: translateX(-65%); }
+    60%{ transform: translateX(65%); }
+    100%{ transform: translateX(65%); }
+  }
 
-.arrow svg{
+  .range{
     width:100%;
-    height:100%;
-}
+    appearance:none;
+    background: transparent;
+    height: 44px;
+    margin:0;
+    position: relative;
+    z-index:2;
+  }
 
-.arrow path{
-    fill:none;
-    stroke:#4b6cff;
-    stroke-width:4;
-    stroke-dasharray:10;
-    animation:dash 4s linear infinite;
-}
+  .range::-webkit-slider-thumb{
+    appearance:none;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: linear-gradient(180deg,var(--agave),#244d43);
+    box-shadow: 0 10px 22px rgba(46,93,80,.25);
+    border: 2px solid rgba(255,255,255,.75);
+    cursor: grab;
+  }
+  .range:active::-webkit-slider-thumb{ cursor: grabbing; }
 
-@keyframes dash{
-    to{ stroke-dashoffset:-200; }
-}
+  .trackText{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    font-weight: 650;
+    color: rgba(29,43,39,.72);
+    z-index:1;
+    user-select:none;
+    pointer-events:none;
+  }
+
+  .lockIcon{
+    width:16px; height:16px;
+    display:inline-block;
+    border: 2px solid rgba(29,43,39,.55);
+    border-radius: 4px;
+    position: relative;
+    transform: translateY(1px);
+  }
+  .lockIcon::before{
+    content:"";
+    position:absolute;
+    width: 10px; height: 8px;
+    left:50%; transform:translateX(-50%);
+    top:-9px;
+    border: 2px solid rgba(29,43,39,.55);
+    border-bottom:none;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .hint{ font-size:13px; opacity:.7; margin-top: 10px; }
+
+  .reveal{
+    margin-top: 22px;
+    display:none;
+  }
+  .reveal.show{ display:block; }
+
+  /* Roll-up cards */
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 16px;
+  }
+  @media (max-width: 720px){
+    .grid{ grid-template-columns: 1fr; }
+  }
+
+  .card{
+    background: var(--card);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+    text-align:center;
+    transform-origin: top center;
+    opacity:0;
+    transform: translateY(22px) scale(.98);
+    filter: blur(6px);
+  }
+
+  .reveal.show .card{
+    animation: rollUp .75s cubic-bezier(.2,.9,.2,1) forwards;
+  }
+  .reveal.show .card:nth-child(2){ animation-delay: .12s; }
+
+  @keyframes rollUp{
+    0%{ opacity:0; transform: translateY(28px) scale(.98); filter: blur(8px); }
+    60%{ opacity:1; transform: translateY(-2px) scale(1.01); filter: blur(0); }
+    100%{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  .tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(199,169,107,.16);
+    color: rgba(29,43,39,.86);
+    font-size: 13px;
+    font-weight: 650;
+    margin-bottom: 14px;
+  }
+  .dot{
+    width:10px; height:10px; border-radius:999px;
+    background: linear-gradient(180deg,var(--gold),#b69145);
+    box-shadow: 0 6px 14px rgba(199,169,107,.25);
+  }
+
+  .qr{
+    width: 240px;
+    max-width: 70vw;
+    border-radius: 16px;
+    display:block;
+    margin: 10px auto 12px;
+  }
+
+  .title{ margin: 2px 0 6px; font-size: 20px; color: var(--agave); font-weight: 750; }
+  .text{ margin: 0; opacity:.72; line-height:1.35; }
+
+  .actions{
+    margin-top: 14px;
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 12px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(46,93,80,.16);
+    background: rgba(46,93,80,.08);
+    color: var(--agave);
+    font-weight: 700;
+    text-decoration:none;
+  }
+
+  .btnPrimary{
+    background: linear-gradient(180deg,var(--agave),#244d43);
+    color: white;
+    border: none;
+    box-shadow: 0 10px 22px rgba(46,93,80,.22);
+  }
+
+  .sparkle{
+    display:none;
+    margin: 14px auto 0;
+    width: 160px;
+    height: 18px;
+    background:
+      radial-gradient(circle at 10% 50%, rgba(199,169,107,.9) 0 2px, transparent 3px),
+      radial-gradient(circle at 30% 35%, rgba(46,93,80,.6) 0 2px, transparent 3px),
+      radial-gradient(circle at 55% 55%, rgba(199,169,107,.8) 0 2px, transparent 3px),
+      radial-gradient(circle at 80% 40%, rgba(46,93,80,.55) 0 2px, transparent 3px);
+    opacity:.8;
+    filter: blur(.1px);
+    animation: twinkle 1.4s ease-in-out infinite;
+  }
+  .sparkle.show{ display:block; }
+  @keyframes twinkle{
+    0%,100%{ transform: translateY(0); opacity:.65; }
+    50%{ transform: translateY(-2px); opacity:.95; }
+  }
+
+  /* Cool scroll overlay */
+  .scrollOverlay{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:0;
+    background: radial-gradient(circle at 50% 30%, rgba(199,169,107,.18), rgba(46,93,80,.10), rgba(0,0,0,0));
+    backdrop-filter: blur(8px);
+    transition: opacity .35s ease;
+    z-index:999;
+  }
+  .scrollOverlay.show{ opacity:1; }
 </style>
 </head>
 
 <body>
+<div class="scrollOverlay" id="scrollOverlay"></div>
 
-<h1>Unser digitales Gästebuch</h1>
-<div class="subtitle">
-Scanne die Schritte oder nutze den Button
+<div class="wrap">
+  <div class="hero" id="top">
+    <h1>Unser digitales Gästebuch</h1>
+    <p class="subtitle">Hinterlasse uns eine Nachricht, ein Foto und deinen Lieblingssong ✨</p>
+
+    <div class="sliderShell" id="sliderShell">
+      <div class="shine"></div>
+      <div class="trackText" id="trackText">
+        <span class="lockIcon" aria-hidden="true"></span>
+        <span id="trackLabel">Slide to unlock</span>
+      </div>
+      <input class="range" id="unlock" type="range" min="0" max="100" value="0" />
+    </div>
+
+    <div class="hint" id="hint">Schiebe den Regler nach rechts – dann erscheinen die QR-Codes.</div>
+    <div class="sparkle" id="sparkle"></div>
+  </div>
+
+  <div class="reveal" id="reveal">
+    <div class="grid" id="qrSection">
+      <div class="card">
+        <div class="tag"><span class="dot"></span> Schritt 1</div>
+        <div class="title">Mit Gast-WLAN verbinden</div>
+        <img src="wifi-qr.png" class="qr" alt="WLAN QR Code">
+        <p class="text">QR scannen → WLAN beitreten.</p>
+      </div>
+
+      <div class="card">
+        <div class="tag"><span class="dot"></span> Schritt 2</div>
+        <div class="title">Gästebuch öffnen</div>
+        <img src="guestbook-qr.png" class="qr" alt="Gästebuch QR Code">
+        <p class="text">QR scannen → Eintrag schreiben.</p>
+
+        <div class="actions">
+          <a class="btn btnPrimary" href="form.html">Gästebuch direkt öffnen</a>
+          <a class="btn" href="#" id="resetBtn">Zurücksetzen</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="container">
+<script>
+  const unlock = document.getElementById('unlock');
+  const reveal = document.getElementById('reveal');
+  const trackLabel = document.getElementById('trackLabel');
+  const hint = document.getElementById('hint');
+  const sparkle = document.getElementById('sparkle');
+  const resetBtn = document.getElementById('resetBtn');
+  const qrSection = document.getElementById('qrSection');
+  const overlay = document.getElementById('scrollOverlay');
 
-<div class="step">
-<h2>1. Mit Gast-WLAN verbinden</h2>
-<img src="wifi-qr.png" class="qr">
-</div>
+  let unlocked = false;
 
-<div class="arrow" style="top:240px">
-<svg viewBox="0 0 200 120">
-<path d="M10,20 C60,120 140,0 190,100"/>
-</svg>
-</div>
+  function coolScrollTo(el){
+    // Overlay kurz einblenden für “Apple-ish” Transition
+    overlay.classList.add('show');
+    // kleiner Delay -> wirkt wie Transition
+    setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Overlay wieder ausblenden, wenn Scroll “durch” ist
+      setTimeout(() => overlay.classList.remove('show'), 650);
+    }, 120);
+  }
 
-<div class="step">
-<h2>2. Gästebuch öffnen</h2>
-<img src="guestbook-qr.png" class="qr">
-<br>
-<a href="form.html">
-<button>Gästebuch direkt öffnen</button>
-</a>
-</div>
+  function doUnlock(){
+    if (unlocked) return;
+    unlocked = true;
 
-</div>
+    reveal.classList.add('show');
+    sparkle.classList.add('show');
+    trackLabel.textContent = "Unlocked";
+    hint.textContent = "Perfekt! Jetzt einfach Schritt 1 → Schritt 2.";
+    unlock.disabled = true;
 
+    // Warten, bis Cards “reingerollt” sind, dann smooth scrollen
+    setTimeout(() => coolScrollTo(qrSection), 220);
+  }
+
+  unlock.addEventListener('input', () => {
+    const v = Number(unlock.value || 0);
+    if (v > 8 && !unlocked) trackLabel.textContent = "Weiter schieben …";
+    if (v >= 95) doUnlock();
+  });
+
+  // Wenn losgelassen und nicht ganz rechts: springt zurück
+  unlock.addEventListener('change', () => {
+    if (!unlocked) {
+      unlock.value = 0;
+      trackLabel.textContent = "Slide to unlock";
+    }
+  });
+
+  resetBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    unlocked = false;
+    unlock.disabled = false;
+    unlock.value = 0;
+
+    reveal.classList.remove('show');
+    sparkle.classList.remove('show');
+    trackLabel.textContent = "Slide to unlock";
+    hint.textContent = "Schiebe den Regler nach rechts – dann erscheinen die QR-Codes.";
+
+    // Zurück nach oben, auch mit coolem Übergang
+    coolScrollTo(document.getElementById('top'));
+  });
+</script>
 </body>
 </html>
