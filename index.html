@@ -1,212 +1,30 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Gästebuch</title>
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 20px; }
-    input, textarea, button { width: 100%; font-size: 16px; padding: 10px; margin: 8px 0; box-sizing: border-box; }
-    textarea { min-height: 120px; resize: vertical; }
-    .hint { opacity: .75; font-size: 13px; margin-top: -2px; }
-    button { cursor: pointer; }
-    #songResults { margin-top: 6px; border: 1px solid #ddd; border-radius: 12px; overflow: hidden; }
-    .row { display: flex; gap: 10px; align-items: center; padding: 10px; border-top: 1px solid #eee; cursor: pointer; }
-    .row:first-child { border-top: none; }
-    .cover { width: 44px; height: 44px; object-fit: cover; border-radius: 10px; background: #f3f3f3; flex: 0 0 auto; }
-    .title { font-weight: 650; line-height: 1.15; }
-    .meta { font-size: 13px; opacity: .75; line-height: 1.15; margin-top: 2px; }
-    .pill { display: inline-block; font-size: 12px; padding: 4px 10px; border-radius: 999px; background: #f3f3f3; margin: 6px 0 2px; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gästebuch Zugang</title>
+<style>
+body { font-family: system-ui; text-align:center; padding:40px; }
+img { width:220px; margin:20px; }
+h1 { margin-bottom:10px; }
+.box { margin:40px 0; }
+</style>
 </head>
 <body>
-  <h2>Gästebuch ✍️</h2>
 
-  <input id="name" placeholder="Dein Name" maxlength="60" />
-  <textarea id="message" placeholder="Dein Eintrag…" maxlength="600"></textarea>
+<h1>Unser digitales Gästebuch</h1>
+<p>1. Mit WLAN verbinden<br>2. Gästebuch öffnen</p>
 
-  <div class="pill">Lieblingssong (Apple Music / iTunes)</div>
-  <input id="song" placeholder="Song suchen (z.B. 'Viva la Vida')" autocomplete="off" />
-  <div class="hint">Tippe mindestens 3 Zeichen – wähle dann aus der Liste.</div>
+<div class="box">
+<h2>Gast-WLAN</h2>
+<img src="wifi-qr.png">
+</div>
 
-  <div id="songResults"></div>
+<div class="box">
+<h2>Gästebuch öffnen</h2>
+<img src="guestbook-qr.png">
+</div>
 
-  <input id="appleUrl" placeholder="Apple Music Link (wird automatisch gesetzt)" inputmode="url" readonly />
-  <div class="hint">Optional: Wenn du nichts auswählst, bleibt das Feld leer.</div>
-
-  <input id="photo" type="file" accept="image/*" />
-  <div class="hint">Foto optional. Wird automatisch verkleinert.</div>
-
-  <button id="send">Absenden</button>
-  <div id="status" class="hint"></div>
-
-  <!-- ioBroker socket.io wird vom web-Adapter bereitgestellt -->
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const statusEl = document.getElementById('status');
-    const btn = document.getElementById('send');
-
-    function setStatus(t) { statusEl.textContent = t; }
-
-    // ioBroker socket
-    const socket = io.connect();
-
-    // IDs (müssen zu deinem ioBroker Setup passen)
-    const ID_INBOX        = '0_userdata.0.guestbook.inbox';
-    const ID_SONG_QUERY   = '0_userdata.0.guestbook.songQuery';
-    const ID_SONG_RESULTS = '0_userdata.0.guestbook.songResults';
-
-    const songInput = document.getElementById('song');
-    const resultsBox = document.getElementById('songResults');
-    const appleUrlField = document.getElementById('appleUrl');
-
-    // subscribe auf Ergebnisse
-    socket.emit('subscribe', ID_SONG_RESULTS);
-
-    function debounce(fn, ms) {
-      let t;
-      return (...args) => {
-        clearTimeout(t);
-        t = setTimeout(() => fn(...args), ms);
-      };
-    }
-
-    const sendSongQuery = debounce((q) => {
-      socket.emit('setState', ID_SONG_QUERY, { val: q, ack: false });
-    }, 250);
-
-    songInput.addEventListener('input', () => {
-      const q = songInput.value.trim();
-      // wenn User tippt, setze vorherigen Link zurück
-      appleUrlField.value = '';
-      if (q.length < 3) {
-        resultsBox.innerHTML = '';
-        sendSongQuery(''); // leert serverseitige results
-        return;
-      }
-      sendSongQuery(q);
-    });
-
-    function renderResults(items) {
-      resultsBox.innerHTML = '';
-      if (!items || !items.length) return;
-
-      items.forEach(it => {
-        const row = document.createElement('div');
-        row.className = 'row';
-
-        const img = document.createElement('img');
-        img.className = 'cover';
-        img.src = it.cover || '';
-        img.alt = '';
-
-        const txt = document.createElement('div');
-        const safeTitle = (it.title || '').toString();
-        const safeArtist = (it.artist || '').toString();
-        const safeAlbum = (it.album || '').toString();
-
-        txt.innerHTML =
-          `<div class="title">${safeTitle}</div>
-           <div class="meta">${safeArtist}${safeAlbum ? ' • ' + safeAlbum : ''}</div>`;
-
-        row.appendChild(img);
-        row.appendChild(txt);
-
-        row.addEventListener('click', () => {
-          songInput.value = `${safeTitle} – ${safeArtist}`;
-          appleUrlField.value = it.url || '';
-          resultsBox.innerHTML = '';
-        });
-
-        resultsBox.appendChild(row);
-      });
-    }
-
-    socket.on('stateChange', (id, state) => {
-      if (id !== ID_SONG_RESULTS) return;
-      try {
-        const items = JSON.parse(state.val || '[]');
-        renderResults(items);
-      } catch (e) {
-        resultsBox.innerHTML = '';
-      }
-    });
-
-    function compressToJpegBase64(file, maxW = 1600, quality = 0.82) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        const reader = new FileReader();
-        reader.onerror = reject;
-        reader.onload = () => {
-          img.onload = () => {
-            let { width:w, height:h } = img;
-            const scale = Math.min(1, maxW / w);
-            w = Math.round(w * scale);
-            h = Math.round(h * scale);
-
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            resolve(dataUrl);
-          };
-          img.onerror = reject;
-          img.src = reader.result;
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    btn.addEventListener('click', async () => {
-      btn.disabled = true;
-      try {
-        const name = document.getElementById('name').value.trim();
-        const message = document.getElementById('message').value.trim();
-        const appleMusicUrl = appleUrlField.value.trim();
-        const photoFile = document.getElementById('photo').files[0];
-
-        if (!name || !message) {
-          setStatus("Bitte Name und Nachricht ausfüllen.");
-          btn.disabled = false;
-          return;
-        }
-
-        setStatus("Sende…");
-
-        let photoDataUrl = "";
-        if (photoFile) {
-          photoDataUrl = await compressToJpegBase64(photoFile);
-        }
-
-        const payload = {
-          id: Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8),
-          name,
-          message,
-          // für dein Backend: einfach als spotifyUrl Feld weiterverwenden oder getrennt speichern
-          spotifyUrl: appleMusicUrl, // <— so bleibt dein serverseitiges Script kompatibel
-          photoDataUrl,
-          created: Date.now()
-        };
-
-        const val = JSON.stringify(payload);
-
-        // setState via socket.io
-        socket.emit('setState', ID_INBOX, { val, ack: false });
-
-        setStatus("Danke! ✅ Eintrag gespeichert.");
-        document.getElementById('message').value = "";
-        document.getElementById('photo').value = "";
-        appleUrlField.value = "";
-        resultsBox.innerHTML = "";
-      } catch (e) {
-        console.error(e);
-        setStatus("Fehler beim Senden. Bitte nochmal versuchen.");
-      } finally {
-        btn.disabled = false;
-      }
-    });
-  </script>
 </body>
 </html>
