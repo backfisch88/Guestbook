@@ -187,21 +187,22 @@
   }
 
   /* QR wrapper for INLINE SVG */
-  .qrBox{
-    width: 240px;
-    max-width: 70vw;
-    margin: 10px auto 12px;
-    border-radius: 16px;
-    background:#fff;
-    overflow:hidden;
-    box-shadow: 0 10px 22px rgba(0,0,0,.04);
-    border: 1px solid rgba(0,0,0,.04);
-  }
-  .qrBox svg{
-    width:100%;
-    height:auto;
-    display:block;
-  }
+.qrBox{
+  width: 300px;              /* etwas größer */
+  max-width: 78vw;           /* mobile */
+  margin: 10px auto 12px;
+  border-radius: 18px;
+  background:#fff;
+  padding: 14px;             /* <<< wichtig: Quiet-Zone */
+  box-shadow: 0 10px 22px rgba(0,0,0,.04);
+  border: 1px solid rgba(0,0,0,.04);
+}
+
+.qrBox svg{
+  width:100%;
+  height:auto;
+  display:block;
+}
 
   .title{ margin: 2px 0 6px; font-size: 20px; color: var(--agave); font-weight: 750; }
   .text{ margin: 0; opacity:.72; line-height:1.35; }
