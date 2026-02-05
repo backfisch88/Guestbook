@@ -15,7 +15,6 @@
     --card:#ffffff;
     --shadow: 0 14px 34px rgba(0,0,0,.06);
   }
-
   *{ box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
   body{
@@ -26,7 +25,6 @@
     background: linear-gradient(180deg,var(--bg1),var(--bg2));
     text-align:center;
   }
-
   .wrap{ max-width:920px; margin:0 auto; }
 
   h1{ margin:0 0 8px; font-size:34px; letter-spacing:.2px; }
@@ -41,7 +39,20 @@
     backdrop-filter: blur(10px);
   }
 
-  /* “Slide to unlock” */
+  /* Gate card */
+  .gate{
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(46,93,80,.08);
+    border: 1px solid rgba(46,93,80,.12);
+    display:none;
+  }
+  .gate.show{ display:block; }
+  .gateTitle{ font-weight:800; color: var(--agave); margin: 2px 0 6px; }
+  .gateText{ margin: 0; opacity:.78; line-height:1.35; }
+
+  /* Slider */
   .sliderShell{
     margin: 18px auto 6px;
     max-width: 520px;
@@ -51,16 +62,14 @@
     padding: 10px;
     position: relative;
     overflow:hidden;
+    display:none;
   }
+  .sliderShell.show{ display:block; }
 
   .shine{
     position:absolute;
     inset:-40px;
-    background: linear-gradient(110deg,
-      transparent 0%,
-      rgba(255,255,255,.22) 45%,
-      rgba(255,255,255,.06) 55%,
-      transparent 100%);
+    background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,.22) 45%, rgba(255,255,255,.06) 55%, transparent 100%);
     transform: translateX(-60%);
     animation: shine 2.8s ease-in-out infinite;
     pointer-events:none;
@@ -80,7 +89,6 @@
     position: relative;
     z-index:2;
   }
-
   .range::-webkit-slider-thumb{
     appearance:none;
     width: 56px;
@@ -128,22 +136,17 @@
 
   .hint{ font-size:13px; opacity:.7; margin-top: 10px; }
 
-  .reveal{
-    margin-top: 22px;
-    display:none;
-  }
+  /* Reveal */
+  .reveal{ margin-top: 22px; display:none; }
   .reveal.show{ display:block; }
 
-  /* Roll-up cards */
   .grid{
     display:grid;
     grid-template-columns: 1fr 1fr;
     gap: 18px;
     margin-top: 16px;
   }
-  @media (max-width: 720px){
-    .grid{ grid-template-columns: 1fr; }
-  }
+  @media (max-width: 720px){ .grid{ grid-template-columns: 1fr; } }
 
   .card{
     background: var(--card);
@@ -156,10 +159,7 @@
     transform: translateY(22px) scale(.98);
     filter: blur(6px);
   }
-
-  .reveal.show .card{
-    animation: rollUp .75s cubic-bezier(.2,.9,.2,1) forwards;
-  }
+  .reveal.show .card{ animation: rollUp .75s cubic-bezier(.2,.9,.2,1) forwards; }
   .reveal.show .card:nth-child(2){ animation-delay: .12s; }
 
   @keyframes rollUp{
@@ -217,7 +217,6 @@
     font-weight: 700;
     text-decoration:none;
   }
-
   .btnPrimary{
     background: linear-gradient(180deg,var(--agave),#244d43);
     color: white;
@@ -245,7 +244,6 @@
     50%{ transform: translateY(-2px); opacity:.95; }
   }
 
-  /* Cool scroll overlay */
   .scrollOverlay{
     position:fixed;
     inset:0;
@@ -268,9 +266,18 @@
     <h1>Unser digitales Gästebuch</h1>
     <p class="subtitle">Hinterlasse uns eine Nachricht, ein Foto und deinen Lieblingssong ✨</p>
 
+    <!-- Gate message when token missing/invalid -->
+    <div class="gate" id="gate">
+      <div class="gateTitle">Zugang gesperrt</div>
+      <p class="gateText">
+        Bitte nutze den NFC-Tag am Eingang, damit die QR-Codes angezeigt werden.
+      </p>
+    </div>
+
+    <!-- Slider only shows when token is valid -->
     <div class="sliderShell" id="sliderShell">
       <div class="shine"></div>
-      <div class="trackText" id="trackText">
+      <div class="trackText">
         <span class="lockIcon" aria-hidden="true"></span>
         <span id="trackLabel">Slide to unlock</span>
       </div>
@@ -293,19 +300,34 @@
       <div class="card">
         <div class="tag"><span class="dot"></span> Schritt 2</div>
         <div class="title">Gästebuch öffnen</div>
-        <img src="guestbook-qr.png" class="qr" alt="Gästebuch QR Code">
-        <p class="text">QR scannen → Eintrag schreiben.</p>
+        <p class="text">Wenn du im WLAN bist, kannst du hier direkt starten:</p>
 
         <div class="actions">
-          <a class="btn btnPrimary" href="form.html">Gästebuch direkt öffnen</a>
+          <a class="btn btnPrimary" id="guestbookBtn" href="#">Gästebuch öffnen</a>
           <a class="btn" href="#" id="resetBtn">Zurücksetzen</a>
         </div>
+
+        <p class="hint" style="margin-top:12px;">
+          (Der Link funktioniert nur im richtigen WLAN.)
+        </p>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+  // ====== KONFIG ======
+  // NFC URL Beispiel:
+  // https://USERNAME.github.io/guestbook/?t=HENRIK2026
+  const ALLOWED_TOKENS = new Set([
+    "p5edDWqoCeCVXFKOFBfGkGAgMWYeg1qRXFmqRrxa6SBYyo373KQL4s3WwgoUsoWc"
+    // weitere Tokens möglich: "HENRIK2026A", "HENRIK2026B"
+  ]);
+
+  // Lokaler Gästebuch-Link (im Gastnetz erreichbar, z.B. ioBroker):
+  const GUESTBOOK_URL = "http://192.168.178.50:8082/guestbook/";
+  // ====================
+
   const unlock = document.getElementById('unlock');
   const reveal = document.getElementById('reveal');
   const trackLabel = document.getElementById('trackLabel');
@@ -314,16 +336,18 @@
   const resetBtn = document.getElementById('resetBtn');
   const qrSection = document.getElementById('qrSection');
   const overlay = document.getElementById('scrollOverlay');
+  const gate = document.getElementById('gate');
+  const sliderShell = document.getElementById('sliderShell');
+  const guestbookBtn = document.getElementById('guestbookBtn');
+
+  guestbookBtn.href = GUESTBOOK_URL;
 
   let unlocked = false;
 
   function coolScrollTo(el){
-    // Overlay kurz einblenden für “Apple-ish” Transition
     overlay.classList.add('show');
-    // kleiner Delay -> wirkt wie Transition
     setTimeout(() => {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Overlay wieder ausblenden, wenn Scroll “durch” ist
       setTimeout(() => overlay.classList.remove('show'), 650);
     }, 120);
   }
@@ -331,14 +355,11 @@
   function doUnlock(){
     if (unlocked) return;
     unlocked = true;
-
     reveal.classList.add('show');
     sparkle.classList.add('show');
     trackLabel.textContent = "Unlocked";
-    hint.textContent = "Perfekt! Jetzt einfach Schritt 1 → Schritt 2.";
+    hint.textContent = "Perfekt! Jetzt Schritt 1 → dann Gästebuch öffnen.";
     unlock.disabled = true;
-
-    // Warten, bis Cards “reingerollt” sind, dann smooth scrollen
     setTimeout(() => coolScrollTo(qrSection), 220);
   }
 
@@ -348,7 +369,6 @@
     if (v >= 95) doUnlock();
   });
 
-  // Wenn losgelassen und nicht ganz rechts: springt zurück
   unlock.addEventListener('change', () => {
     if (!unlocked) {
       unlock.value = 0;
@@ -361,15 +381,42 @@
     unlocked = false;
     unlock.disabled = false;
     unlock.value = 0;
-
     reveal.classList.remove('show');
     sparkle.classList.remove('show');
     trackLabel.textContent = "Slide to unlock";
     hint.textContent = "Schiebe den Regler nach rechts – dann erscheinen die QR-Codes.";
-
-    // Zurück nach oben, auch mit coolem Übergang
     coolScrollTo(document.getElementById('top'));
   });
+
+  // ====== TOKEN CHECK (soft gate) ======
+  function getToken(){
+    const params = new URLSearchParams(window.location.search);
+    return (params.get('t') || "").trim();
+  }
+
+  const token = getToken();
+  const valid = token && ALLOWED_TOKENS.has(token);
+
+  if (!valid){
+    // Ohne Token: Slider verstecken, Gate anzeigen
+    gate.classList.add('show');
+    sliderShell.classList.remove('show');
+    hint.textContent = "Halte dein Handy an den NFC-Tag, um fortzufahren.";
+  } else {
+    // Mit Token: Slider anzeigen
+    sliderShell.classList.add('show');
+    gate.classList.remove('show');
+
+    // Optional: Token aus der URL entfernen, damit man ihn nicht so leicht sieht (nice-to-have)
+    // Das ist keine echte Sicherheit, aber schöner.
+    try{
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, "", cleanUrl);
+    } catch(e){}
+
+    // Optional: Wenn du willst, dass es automatisch “ready” wirkt:
+    hint.textContent = "Willkommen! Slide to unlock 🙂";
+  }
 </script>
 </body>
 </html>
