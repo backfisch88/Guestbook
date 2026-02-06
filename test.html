@@ -186,41 +186,57 @@
     white-space: pre-wrap;
   }
 
-  .song{
+  /* Song card */
+  .songCard{
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    flex-wrap:wrap;
+    gap:12px;
+    background:rgba(199,169,107,.12);
+    border-radius:18px;
+    padding:10px 12px;
+    border:1px solid rgba(199,169,107,.25);
   }
-  .songTag{
-    display:inline-flex;
+  .songCover{
+    width:58px;
+    height:58px;
+    border-radius:12px;
+    object-fit:cover;
+    box-shadow: 0 10px 24px rgba(0,0,0,.10);
+  }
+  .songMeta{
+    flex:1;
+    text-align:left;
+    min-width: 0;
+  }
+  .songTitle{
+    font-weight:950;
+    font-size:14px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .songArtist{
+    font-size:12px;
+    opacity:.72;
+    font-weight:700;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    margin-top:2px;
+  }
+  .songPlay{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    background:linear-gradient(180deg,var(--agave),var(--agave2));
+    display:flex;
     align-items:center;
-    gap:8px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(199,169,107,.16);
-    border: 1px solid rgba(199,169,107,.22);
-    font-size: 12px;
-    font-weight: 900;
-    color: rgba(29,43,39,.82);
-  }
-  .dot{
-    width:10px;height:10px;border-radius:999px;
-    background: linear-gradient(180deg,var(--gold),#b69145);
-    box-shadow: 0 6px 14px rgba(199,169,107,.22);
-  }
-  .songBtn{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding: 11px 14px;
-    border-radius: 16px;
-    text-decoration:none;
-    font-weight: 900;
+    justify-content:center;
     color:white;
-    background: linear-gradient(180deg,var(--agave),var(--agave2));
-    box-shadow: 0 12px 26px rgba(46,93,80,.20);
+    font-weight:950;
+    text-decoration:none;
+    box-shadow: 0 12px 26px rgba(46,93,80,.18);
+    flex: 0 0 auto;
   }
 
   /* Bottom controls */
@@ -265,7 +281,6 @@
     z-index:10;
   }
 
-  /* Small screens */
   @media (max-height: 680px){
     .photo{ height: 58%; }
     .controls{ bottom: 12px; }
@@ -288,10 +303,8 @@
 
 <div class="stage">
   <div class="stack" aria-label="Gästebuch Karten">
-    <!-- back card (preview) -->
     <div class="card back" id="cardBack" aria-hidden="true"></div>
 
-    <!-- front card (interactive) -->
     <div class="card" id="cardFront">
       <div class="badge next" id="badgeNext">NEXT</div>
       <div class="badge prev" id="badgePrev">BACK</div>
@@ -306,9 +319,13 @@
 
         <div class="text" id="text">—</div>
 
-        <div class="song">
-          <span class="songTag"><span class="dot"></span> Lieblingssong</span>
-          <a class="songBtn" id="songBtn" href="#" target="_blank" rel="noopener">🎵 Anhören</a>
+        <div class="songCard">
+          <img id="songCover" class="songCover" alt="">
+          <div class="songMeta">
+            <div id="songTitle" class="songTitle">—</div>
+            <div id="songArtist" class="songArtist">—</div>
+          </div>
+          <a id="songBtn" class="songPlay" href="#" target="_blank" rel="noopener">▶</a>
         </div>
       </div>
     </div>
@@ -323,7 +340,7 @@
 </div>
 
 <script>
-  // Demo-Daten (Apple Music Links als Demo)
+  // Demo-Daten (Apple Music Links + Cover)
   const entries = [
     {
       id: "d1",
@@ -331,7 +348,9 @@
       place: "Dreieich",
       text: "So schön, dass wir dabei sein durften! 🥰\nEuer Gästebuch ist einfach next level.",
       photo: "https://picsum.photos/900/1200?random=21",
-      songTitle: "Coldplay – Viva la Vida",
+      songTitle: "Viva la Vida",
+      songArtist: "Coldplay",
+      songCover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/40/fe/2e/40fe2e0f-63ef-9e4c-6d5e-2a1b1d70e3e9/190295851286.jpg/600x600bb.jpg",
       appleMusicUrl: "https://music.apple.com/de/album/viva-la-vida/112277347?i=112277408"
     },
     {
@@ -340,16 +359,20 @@
       place: "Offenbach",
       text: "Mega Stimmung, super Leute – und das Essen war brutal gut.\nDanke für den tollen Abend! ✨",
       photo: "https://picsum.photos/900/1200?random=22",
-      songTitle: "Daft Punk – Get Lucky",
+      songTitle: "Get Lucky",
+      songArtist: "Daft Punk ft. Pharrell Williams",
+      songCover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/43/6b/6f/436b6f99-4c9b-e8d7-6e36-2bdfd5f2c82c/886443919902.jpg/600x600bb.jpg",
       appleMusicUrl: "https://music.apple.com/de/album/get-lucky/617154241?i=617154366"
     },
     {
       id: "d3",
       name: "Julia",
       place: "Frankfurt",
-      text: "Ich wünsche euch nur das Beste ❤️\nBleibt genau so wie ihr seid!",
+      text: "Wir wünschen euch nur das Beste ❤️\nBleibt genau so wie ihr seid!",
       photo: "https://picsum.photos/900/1200?random=23",
-      songTitle: "Ed Sheeran – Perfect",
+      songTitle: "Perfect",
+      songArtist: "Ed Sheeran",
+      songCover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/93/9a/3c/939a3cdd-0b17-570f-4c8d-5bbd1d0c1d9f/190295851828.jpg/600x600bb.jpg",
       appleMusicUrl: "https://music.apple.com/de/album/perfect/1193701079?i=1193701359"
     },
     {
@@ -358,7 +381,9 @@
       place: "Neu-Isenburg",
       text: "Das ist offiziell das coolste Gästebuch ever.\nSwipe-Game strong 😄",
       photo: "https://picsum.photos/900/1200?random=24",
-      songTitle: "The Weeknd – Blinding Lights",
+      songTitle: "Blinding Lights",
+      songArtist: "The Weeknd",
+      songCover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/8f/19/6c/8f196c61-dcb3-5f37-41e6-6c9f2e6e2c5c/20UMGIM09988.rgb.jpg/600x600bb.jpg",
       appleMusicUrl: "https://music.apple.com/de/album/blinding-lights/1499378108?i=1499378145"
     }
   ];
@@ -374,7 +399,12 @@
   const nameEl  = document.getElementById('name');
   const placeEl = document.getElementById('place');
   const textEl  = document.getElementById('text');
-  const songBtn = document.getElementById('songBtn');
+
+  const songCoverEl = document.getElementById('songCover');
+  const songTitleEl = document.getElementById('songTitle');
+  const songArtistEl= document.getElementById('songArtist');
+  const songBtn     = document.getElementById('songBtn');
+
   const counter = document.getElementById('counter');
 
   const badgeNext = document.getElementById('badgeNext');
@@ -383,69 +413,46 @@
   const nextBtn = document.getElementById('nextBtn');
   const prevBtn = document.getElementById('prevBtn');
 
+  function clamp(i){
+    return Math.max(0, Math.min(entries.length - 1, i));
+  }
   function get(i){
-    const c = Math.max(0, Math.min(entries.length - 1, i));
-    return entries[c];
+    return entries[clamp(i)];
   }
 
-  function renderCard(el, entry){
-    el.innerHTML = `
-      <div class="photo">
-        <img src="${entry.photo}" alt="">
-      </div>
-      <div class="content">
-        <div class="nameRow">
-          <h2 class="name">${entry.name}</h2>
-          <p class="place">${entry.place}</p>
-        </div>
-        <div class="text">${escapeHtml(entry.text)}</div>
-        <div class="song">
-          <span class="songTag"><span class="dot"></span> Lieblingssong</span>
-          <a class="songBtn" href="${entry.appleMusicUrl}" target="_blank" rel="noopener">🎵 Anhören</a>
-        </div>
-      </div>
+  function renderBackPreview(){
+    const next = get(Math.min(entries.length - 1, idx + 1));
+    cardBack.innerHTML = `
+      <div class="photo"><img src="${next.photo}" alt=""></div>
     `;
-  }
-
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;")
-      .replaceAll("\n","<br>");
   }
 
   function render(){
     const e = get(idx);
-    const next = get(Math.min(entries.length - 1, idx + 1));
 
-    // front (interactive)
     photoEl.innerHTML = `<img src="${e.photo}" alt="">`;
     nameEl.textContent = e.name;
     placeEl.textContent = e.place;
     textEl.textContent = e.text;
-    songBtn.href = e.appleMusicUrl;
-    songBtn.textContent = "🎵 Anhören";
-    songBtn.title = e.songTitle || "Apple Music";
 
-    // back preview
-    cardBack.innerHTML = `
-      <div class="photo"><img src="${next.photo}" alt=""></div>
-    `;
+    songCoverEl.src = e.songCover;
+    songCoverEl.alt = e.songTitle + " Cover";
+    songTitleEl.textContent = e.songTitle;
+    songArtistEl.textContent = e.songArtist;
+    songBtn.href = e.appleMusicUrl;
+    songBtn.title = "In Apple Music öffnen";
 
     counter.textContent = `${idx + 1} / ${entries.length}`;
 
-    // reset transforms
     cardFront.style.transition = 'none';
     cardFront.style.transform = 'translate3d(0,0,0) rotate(0deg)';
     badgeNext.style.opacity = 0;
     badgePrev.style.opacity = 0;
+
+    renderBackPreview();
   }
 
   function go(direction){
-    // direction: 'next' (swipe right) or 'prev' (swipe left)
     const w = Math.max(window.innerWidth, 360);
     const x = direction === 'next' ? w * 0.85 : -w * 0.85;
     const rot = direction === 'next' ? 12 : -12;
@@ -456,8 +463,8 @@
 
     setTimeout(() => {
       cardFront.style.opacity = 1;
-      if (direction === 'next') idx = Math.min(entries.length - 1, idx + 1);
-      else idx = Math.max(0, idx - 1);
+      if (direction === 'next') idx = clamp(idx + 1);
+      else idx = clamp(idx - 1);
       render();
     }, 240);
   }
@@ -482,7 +489,6 @@
     const dx = ev.clientX - startX;
     const dy = ev.clientY - startY;
 
-    // allow vertical gesture for small accidental scroll (we mostly lock scrolling anyway)
     if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 14) return;
 
     lastDX = dx;
