@@ -24,7 +24,7 @@
     font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
     background: linear-gradient(180deg,var(--bg1),var(--bg2));
     color: var(--ink);
-    overflow:hidden; /* Vollbild, kein Body-Scroll */
+    overflow:hidden;
   }
 
   .stage{
@@ -51,11 +51,11 @@
     overflow:hidden;
     transform: translate3d(0,0,0);
     will-change: transform;
-    touch-action: pan-y; /* vertikal scrollen erlauben */
+    touch-action: pan-y;
     user-select:none;
   }
 
-  /* nächste Karte leicht sichtbar */
+  /* “untere” Karte als Vorschau */
   .card.back{
     inset:10px;
     border-radius: 28px;
@@ -63,11 +63,6 @@
     opacity:.55;
     transform: scale(.985) translateY(8px);
     filter: blur(.2px);
-  }
-
-  .card.front{
-    inset:0;
-    border-radius: 0;
   }
 
   .photo{
@@ -149,7 +144,6 @@
     white-space: pre-wrap;
   }
 
-  /* NEU: Kacki-Block */
   .kacki{
     margin: 10px 0 14px;
     padding: 12px 12px;
@@ -160,7 +154,6 @@
   .kacki .q{
     font-size: 12px;
     font-weight: 950;
-    letter-spacing:.2px;
     opacity:.78;
     margin-bottom:6px;
   }
@@ -187,11 +180,7 @@
     background: linear-gradient(180deg, rgba(46,93,80,.18), rgba(199,169,107,.18));
     flex: 0 0 auto;
   }
-  .songMeta{
-    flex:1;
-    min-width:0;
-    text-align:left;
-  }
+  .songMeta{ flex:1; min-width:0; }
   .songTitle{
     font-weight: 950;
     font-size: 14px;
@@ -223,7 +212,6 @@
     flex: 0 0 auto;
   }
 
-  /* NEU: “Ende”-Teaser (wird nur hinter der letzten Karte leicht sichtbar) */
   .endTeaser{
     height:100%;
     display:flex;
@@ -238,7 +226,6 @@
     font-weight: 950;
     font-size: 26px;
     color: var(--agave);
-    letter-spacing:.2px;
   }
   .endTeaser .s{
     margin-top:10px;
@@ -247,18 +234,15 @@
     font-size: 13px;
   }
 
-  /* Subtiler “Hint” ohne Text: einmaliges Mini-Wackeln */
   @keyframes nudge{
-    0%   { transform: translate3d(0,0,0) rotate(0deg); }
-    18%  { transform: translate3d(-16px,0,0) rotate(-1.2deg); }
-    36%  { transform: translate3d(12px,0,0) rotate(0.9deg); }
-    54%  { transform: translate3d(-10px,0,0) rotate(-0.8deg); }
-    72%  { transform: translate3d(8px,0,0) rotate(0.6deg); }
-    100% { transform: translate3d(0,0,0) rotate(0deg); }
+    0%{ transform: translate3d(0,0,0) rotate(0deg); }
+    18%{ transform: translate3d(-16px,0,0) rotate(-1.2deg); }
+    36%{ transform: translate3d(12px,0,0) rotate(0.9deg); }
+    54%{ transform: translate3d(-10px,0,0) rotate(-0.8deg); }
+    72%{ transform: translate3d(8px,0,0) rotate(0.6deg); }
+    100%{ transform: translate3d(0,0,0) rotate(0deg); }
   }
-  .nudgeOnce{
-    animation: nudge 920ms cubic-bezier(.2,.9,.2,1) 1;
-  }
+  .nudgeOnce{ animation: nudge 920ms cubic-bezier(.2,.9,.2,1) 1; }
 
   @media (max-height: 740px){
     .photo{ height: 54vh; }
@@ -287,7 +271,6 @@
 
         <div class="text" id="text">—</div>
 
-        <!-- NEU: Kacki -->
         <div class="kacki" id="kacki">
           <div class="q">Wie war dein Kacki heute?</div>
           <div class="a" id="kackiVal">—</div>
@@ -307,8 +290,6 @@
 </div>
 
 <script>
-  // Demo-Daten: Apple Music Track IDs
-  // Beispiel: https://music.apple.com/de/album/message-in-a-bottle/214355871?i=214356293  -> Track-ID = 214356293
   const entries = [
     {
       id: "d1",
@@ -373,8 +354,6 @@
   const songCache = new Map();
 
   function clamp(i){ return Math.max(0, Math.min(entries.length - 1, i)); }
-  function get(i){ return entries[clamp(i)]; }
-
   function setFrontReset(){
     cardFront.style.transition = 'none';
     cardFront.style.transform = 'translate3d(0,0,0) rotate(0deg)';
@@ -383,9 +362,16 @@
     badgePrev.style.opacity = 0;
   }
 
-  // NEU: Ende-Teaser statt Wiederholung der letzten Seite
-  function renderBackPreview(){
-    if (idx >= entries.length - 1){
+  // === FIX: Back-Preview abhängig von Richtung ===
+  // dir = 'next' (Swipe links) zeigt idx+1
+  // dir = 'prev' (Swipe rechts) zeigt idx-1
+  function renderBackPreviewFor(dir){
+    let targetIndex;
+    if (dir === 'prev') targetIndex = idx - 1;
+    else targetIndex = idx + 1;
+
+    // Ende-Teaser nur wenn man "weiter" von der letzten Seite will
+    if (dir === 'next' && idx >= entries.length - 1){
       cardBack.innerHTML = `
         <div class="endTeaser">
           <div class="t">Ende</div>
@@ -394,8 +380,13 @@
       `;
       return;
     }
-    const next = entries[idx + 1];
-    cardBack.innerHTML = `<div class="photo"><img src="${next.photo}" alt=""></div>`;
+
+    // Wenn es keinen vorherigen gibt: einfach den aktuellen als ruhige Vorschau
+    if (targetIndex < 0) targetIndex = idx;
+    if (targetIndex > entries.length - 1) targetIndex = idx;
+
+    const p = entries[targetIndex].photo;
+    cardBack.innerHTML = `<div class="photo"><img src="${p}" alt=""></div>`;
   }
 
   function setSongFallback(trackId){
@@ -459,34 +450,28 @@
   }
 
   function render(){
-    const e = get(idx);
+    const e = entries[idx];
 
     photoEl.innerHTML = `<img src="${e.photo}" alt="">`;
     nameEl.textContent = e.name;
     placeEl.textContent = e.place;
     textEl.textContent = e.text;
 
-    // NEU: Kacki
     kackiValEl.textContent = e.kacki || "—";
 
-    // beim Wechsel immer nach oben scrollen
     contentEl.scrollTop = 0;
 
-    // song placeholder
     setSongFallback(e.appleTrackId);
     loadSong(e.appleTrackId);
 
     setFrontReset();
-    renderBackPreview();
+    // Standard: beim Stillstand immer "nächste" Karte als Vorschau
+    renderBackPreviewFor('next');
   }
 
-  // Swipe wie ein Buch:
-  // Swipe links = nächster (weiterblättern)
-  // Swipe rechts = vorheriger (zurückblättern)
   function go(direction){
-    // direction: 'next' or 'prev'
     const w = Math.max(window.innerWidth, 360);
-    const x = direction === 'next' ? -w * 0.90 : w * 0.90; // next fliegt nach LINKS raus
+    const x = direction === 'next' ? -w * 0.90 : w * 0.90;
     const rot = direction === 'next' ? -14 : 14;
 
     cardFront.style.transition = 'transform 240ms ease-out, opacity 240ms ease-out';
@@ -518,22 +503,23 @@
     const dx = ev.clientX - startX;
     const dy = ev.clientY - startY;
 
-    // vertikal dominiert -> nicht swipen (damit scroll für lange Texte klappt)
     if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 12) return;
 
     lastDX = dx;
     const rot = Math.max(-16, Math.min(16, dx / 15));
     cardFront.style.transform = `translate3d(${dx}px, 0, 0) rotate(${rot}deg)`;
 
-    // Badges passend zur Buchlogik:
-    // dx < 0 (Swipe nach links) => NEXT
-    // dx > 0 (Swipe nach rechts) => BACK
+    // Badges + Back-Preview passend zur Richtung:
+    // dx < 0 => NEXT (zeigt Vorschau idx+1 bzw. Ende-Teaser)
+    // dx > 0 => BACK (zeigt Vorschau idx-1)
     if (dx < 0){
       badgeNext.style.opacity = Math.min(1, (-dx) / 120);
       badgePrev.style.opacity = 0;
+      renderBackPreviewFor('next');
     } else {
       badgePrev.style.opacity = Math.min(1, dx / 120);
       badgeNext.style.opacity = 0;
+      renderBackPreviewFor('prev');
     }
   }
 
@@ -543,12 +529,14 @@
 
     const threshold = 130;
 
-    // NEU: am Ende nicht "umklappen" zur letzten Karte -> einfach zurücksnappen
+    // am Ende: "weiter" soll nur den Ende-Teaser zeigen, aber nicht wechseln
     if (idx >= entries.length - 1 && lastDX < -threshold){
       cardFront.style.transition = 'transform 180ms ease-out';
       cardFront.style.transform = 'translate3d(0,0,0) rotate(0deg)';
       badgeNext.style.opacity = 0;
       badgePrev.style.opacity = 0;
+      // zurück zur Standard-Vorschau (next = Ende-Teaser)
+      renderBackPreviewFor('next');
       return;
     }
 
@@ -561,6 +549,7 @@
       cardFront.style.transform = 'translate3d(0,0,0) rotate(0deg)';
       badgeNext.style.opacity = 0;
       badgePrev.style.opacity = 0;
+      renderBackPreviewFor('next');
     }
   }
 
@@ -569,13 +558,11 @@
   cardFront.addEventListener('pointerup', onUp);
   cardFront.addEventListener('pointercancel', onUp);
 
-  // Einmaliger subtiler “Nudge” beim Start (zeigt, dass man swipen kann)
   function nudgeOnce(){
     cardFront.classList.add('nudgeOnce');
     setTimeout(() => cardFront.classList.remove('nudgeOnce'), 1000);
   }
 
-  // Init
   render();
   setTimeout(nudgeOnce, 450);
 </script>
