@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Willkommen bei uns!</title>
+
+<style>
+  :root{
+    --agave:#2e5d50;
+    --agaveDark:#244d43;
+    --gold:#c7a96b;
+    --ink:#1d2b27;
+    --muted: rgba(29,43,39,.62);
+    --bg1:#f3f0ea;
+    --bg2:#e7efe9;
+    --card:#ffffff;
+    --shadow: 0 18px 50px rgba(0,0,0,.10);
+    --radius: 28px;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color:var(--ink);
+    background:
+      radial-gradient(900px 500px at 50% 0%, rgba(46,93,80,.10), transparent 60%),
+      radial-gradient(700px 400px at 25% 30%, rgba(199,169,107,.12), transparent 55%),
+      linear-gradient(180deg, var(--bg2), var(--bg1));
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:34px 16px 40px;
+  }
+
+  .wrap{
+    width:min(460px, 100%);
+    text-align:center;
+  }
+
+  h1{
+    margin: 6px 0 10px;
+    font-size: clamp(30px, 6vw, 44px);
+    letter-spacing: -.3px;
+    font-weight: 900;
+  }
+  .subtitle{
+    margin: 0 0 22px;
+    color: var(--muted);
+    line-height:1.35;
+    font-size: 17px;
+  }
+
+  .card{
+    margin: 18px auto 0;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(255,255,255,.70);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    padding: 20px 18px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:-120px -60px auto -60px;
+    height:240px;
+    background: radial-gradient(circle at 50% 50%, rgba(199,169,107,.18), transparent 60%);
+    pointer-events:none;
+  }
+
+  .wifiIcon{
+    width:72px;
+    height:72px;
+    margin: 8px auto 10px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(46,93,80,.18), rgba(46,93,80,.08));
+    border: 1px solid rgba(46,93,80,.14);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 16px 30px rgba(46,93,80,.10);
+  }
+  .wifiIcon svg{ width:34px; height:34px; opacity:.95; }
+
+  .ssid{
+    margin: 6px 0 4px;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -.2px;
+  }
+  .note{
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  /* Center “Tap to reveal” area */
+  .revealArea{
+    margin: 14px auto 8px;
+    width: 210px;
+    height: 210px;
+    border-radius: 999px;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* Frosted circle behind */
+  .circleBg{
+    position:absolute;
+    inset: 10px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.92), rgba(255,255,255,.64));
+    border: 1px solid rgba(0,0,0,.04);
+    box-shadow: inset 0 0 0 16px rgba(46,93,80,.04), 0 18px 40px rgba(0,0,0,.10);
+  }
+
+  /* Fingerprint layer */
+  .fingerLayer{
+    position:absolute;
+    inset: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap: 10px;
+    cursor:pointer;
+    user-select:none;
+  }
+
+  .touchGlow{
+    position:absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: radial-gradient(circle at 50% 50%, rgba(199,169,107,.22), transparent 55%);
+    filter: blur(2px);
+    opacity:0;
+    transition: opacity .25s ease;
+    pointer-events:none;
+  }
+
+  .finger{
+    width:74px;
+    height:74px;
+    opacity:.84;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,.10));
+  }
+
+  .tapPill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 12px 18px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(0,0,0,.05);
+    font-weight: 800;
+    color: rgba(29,43,39,.72);
+    box-shadow: 0 10px 22px rgba(0,0,0,.07);
+  }
+
+  /* QR layer (initially hidden) */
+  .qrLayer{
+    position:absolute;
+    inset: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 16px;
+    opacity:0;
+    transform: scale(.92) translateY(10px);
+    pointer-events:none;
+  }
+
+  .qrImg{
+    width: 100%;
+    max-width: 210px;
+    border-radius: 18px;
+    background:#fff;
+    padding: 14px;              /* Quiet zone */
+    box-shadow: 0 16px 34px rgba(0,0,0,.12);
+    border: 1px solid rgba(0,0,0,.05);
+  }
+
+  /* Buttons below */
+  .buttons{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .btn{
+    border:none;
+    border-radius: 18px;
+    padding: 16px 14px;
+    font-size: 16px;
+    font-weight: 900;
+    cursor:pointer;
+    box-shadow: 0 14px 28px rgba(0,0,0,.08);
+    border: 1px solid rgba(0,0,0,.05);
+    background: rgba(255,255,255,.85);
+    color: var(--ink);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:active{ transform: translateY(1px) scale(.99); }
+
+  .btnPrimary{
+    background: linear-gradient(180deg, var(--agave), var(--agaveDark));
+    color:#fff;
+    border: none;
+    box-shadow: 0 16px 34px rgba(46,93,80,.22);
+  }
+
+  /* Animations */
+  .revealArea.isRevealed .fingerLayer{
+    animation: fingerOut .55s cubic-bezier(.2,.9,.2,1) forwards;
+  }
+  .revealArea.isRevealed .qrLayer{
+    animation: qrIn .70s cubic-bezier(.2,.9,.2,1) .10s forwards;
+    pointer-events:auto;
+  }
+  .revealArea.isRevealed .touchGlow{
+    opacity:1;
+    animation: glowPulse .9s ease-out forwards;
+  }
+
+  @keyframes fingerOut{
+    0%{ opacity:1; transform: scale(1) translateY(0); filter: blur(0); }
+    55%{ opacity:.3; transform: scale(1.06) translateY(-6px); }
+    100%{ opacity:0; transform: scale(.92) translateY(18px); filter: blur(6px); }
+  }
+
+  @keyframes qrIn{
+    0%{ opacity:0; transform: scale(.90) translateY(14px); filter: blur(10px); }
+    70%{ opacity:1; transform: scale(1.02) translateY(-2px); filter: blur(0); }
+    100%{ opacity:1; transform: scale(1) translateY(0); filter: blur(0); }
+  }
+
+  @keyframes glowPulse{
+    0%{ opacity:0; transform: scale(.92); }
+    40%{ opacity:1; transform: scale(1); }
+    100%{ opacity:.0; transform: scale(1.08); }
+  }
+
+  /* Small helper text under QR */
+  .qrHint{
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: rgba(29,43,39,.62);
+  }
+</style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Willkommen bei uns!</h1>
+    <div class="subtitle">Schön, dass ihr da seid. Verbindet euch direkt mit unserem Netz.</div>
+
+    <div class="card">
+      <div class="wifiIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M2.5 8.5C8.5 3.5 15.5 3.5 21.5 8.5" stroke="rgba(46,93,80,.92)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M5.5 11.5C10 7.8 14 7.8 18.5 11.5" stroke="rgba(46,93,80,.92)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M8.7 14.6C11 12.8 13 12.8 15.3 14.6" stroke="rgba(46,93,80,.92)" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="12" cy="18" r="1.6" fill="rgba(46,93,80,.92)"/>
+        </svg>
+      </div>
+
+      <div class="ssid" id="ssidLabel">Pretty fly for a WIFI</div>
+      <div class="note">Tippe auf den Fingerabdruck – dann erscheint der QR-Code.</div>
+
+      <!-- Tap fingerprint -> fingerprint fades out -> QR fades in -->
+      <div class="revealArea" id="revealArea" aria-label="QR anzeigen">
+        <div class="circleBg"></div>
+
+        <div class="touchGlow" id="touchGlow"></div>
+
+        <div class="fingerLayer" id="fingerLayer" role="button" tabindex="0" aria-pressed="false">
+          <svg class="finger" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <path d="M32 10c-8 0-14 6-14 14" stroke="rgba(29,43,39,.65)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M46 24c0-8-6-14-14-14" stroke="rgba(29,43,39,.65)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M18 28c0-7 6-12 14-12s14 5 14 12" stroke="rgba(29,43,39,.55)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M22 28c0 16 4 26 10 26" stroke="rgba(29,43,39,.45)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M42 28c0 18-5 28-12 28" stroke="rgba(29,43,39,.45)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M28 30c0 10 2 18 6 18" stroke="rgba(29,43,39,.42)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M36 30c0 12-3 20-7 20" stroke="rgba(29,43,39,.42)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M30 44c0 4 1 8 3 10" stroke="rgba(29,43,39,.35)" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+
+          <div class="tapPill" id="tapPill">Tippe auf den Fingerabdruck</div>
+        </div>
+
+        <div class="qrLayer" id="qrLayer" aria-hidden="true">
+          <img class="qrImg" src="IMG_2088.png" alt="WLAN QR Code">
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn" id="copyBtn">Passwort kopieren</button>
+        <button class="btn btnPrimary" id="showQrBtn">QR anzeigen</button>
+      </div>
+
+      <div class="qrHint" id="qrHint" style="display:none;">
+        QR scannen → WLAN beitreten. (iPhone: Kamera öffnen oder direkt hier scannen)
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ====== CONFIG ======
+  const SSID = "Pretty fly for a WIFI";
+  const PASSWORD = "Dolcegusto79";
+  // ====================
+
+  document.getElementById('ssidLabel').textContent = SSID;
+
+  const revealArea = document.getElementById('revealArea');
+  const fingerLayer = document.getElementById('fingerLayer');
+  const tapPill = document.getElementById('tapPill');
+  const qrHint = document.getElementById('qrHint');
+  const copyBtn = document.getElementById('copyBtn');
+  const showQrBtn = document.getElementById('showQrBtn');
+
+  let revealed = false;
+
+  function revealQR(){
+    if (revealed) return;
+    revealed = true;
+
+    revealArea.classList.add('isRevealed');
+    fingerLayer.setAttribute('aria-pressed', 'true');
+    tapPill.textContent = "QR wird angezeigt …";
+    qrHint.style.display = "block";
+  }
+
+  fingerLayer.addEventListener('click', revealQR);
+  fingerLayer.addEventListener('keydown', (e) => {
+    if (e.key === "Enter" || e.key === " ") revealQR();
+  });
+
+  showQrBtn.addEventListener('click', revealQR);
+
+  copyBtn.addEventListener('click', async () => {
+    try{
+      await navigator.clipboard.writeText(PASSWORD);
+      copyBtn.textContent = "Kopiert ✓";
+      setTimeout(()=> copyBtn.textContent="Passwort kopieren", 1400);
+    }catch(e){
+      const ta = document.createElement('textarea');
+      ta.value = PASSWORD;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      copyBtn.textContent = "Kopiert ✓";
+      setTimeout(()=> copyBtn.textContent="Passwort kopieren", 1400);
+    }
+  });
+</script>
+</body>
+</html>
