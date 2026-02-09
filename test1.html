@@ -13,11 +13,8 @@
     --ink:#1d2b27;
     --bg1:#e7efe9;
     --bg2:#f4f1ea;
-    --card:#ffffff;
-    --shadow:0 22px 60px rgba(0,0,0,.12);
   }
   *{ box-sizing:border-box; }
-  html,body{ height:100%; }
   body{
     margin:0;
     font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
@@ -25,11 +22,7 @@
     color: var(--ink);
   }
 
-  .wrap{
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 22px 16px 34px;
-  }
+  .wrap{ max-width:720px; margin:0 auto; padding:22px 16px 34px; }
 
   .hero{
     background: rgba(255,255,255,.65);
@@ -40,201 +33,219 @@
     backdrop-filter: blur(12px);
   }
 
-  .title{
-    margin:0;
-    font-size: 22px;
-    font-weight: 950;
-    color: var(--agave);
-    letter-spacing:.2px;
-  }
-  .sub{
-    margin:8px 0 0;
-    font-size: 13px;
-    opacity:.75;
-    font-weight: 700;
-    line-height:1.35;
-  }
+  .title{ margin:0; font-size:22px; font-weight:950; color:var(--agave); }
+  .sub{ margin:8px 0 0; font-size:13px; opacity:.75; font-weight:700; line-height:1.35; }
 
-  .grid{
-    display:grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 14px;
-  }
+  .grid{ display:grid; gap:12px; margin-top:14px; }
 
   .field{
-    background: white;
-    border-radius: 18px;
-    border: 1px solid rgba(46,93,80,.12);
-    box-shadow: 0 10px 22px rgba(0,0,0,.06);
-    padding: 12px 12px;
+    background:white;
+    border-radius:18px;
+    border:1px solid rgba(46,93,80,.12);
+    box-shadow:0 10px 22px rgba(0,0,0,.06);
+    padding:14px 16px;
   }
 
   label{
     display:block;
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing:.2px;
+    font-size:12px;
+    font-weight:900;
     color: rgba(29,43,39,.78);
-    margin-bottom: 8px;
+    margin-bottom:8px;
   }
 
-  input, textarea{
+  input,textarea{
     width:100%;
-    border: none;
+    border:none;
     outline:none;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--ink);
-    background: transparent;
+    font-size:16px;
+    font-weight:700;
+    color:var(--ink);
+    background:transparent;
+    padding:10px 10px;
+    box-sizing:border-box;
   }
-  textarea{
-    min-height: 120px;
-    resize: vertical;
-    line-height: 1.35;
-    font-weight: 650;
-  }
+  textarea{ min-height:120px; resize:vertical; line-height:1.35; font-weight:650; }
 
-  .row2{
-    display:grid;
-    gap: 12px;
-    grid-template-columns: 1fr 1fr;
-  }
-  @media (max-width:520px){
-    .row2{ grid-template-columns: 1fr; }
-  }
+  .row2{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+  @media (max-width:520px){ .row2{ grid-template-columns:1fr; } }
 
-  .hint{
-    font-size: 12px;
-    opacity:.72;
-    margin-top:8px;
-    line-height:1.35;
-  }
+  .hint{ font-size:12px; opacity:.72; margin-top:8px; line-height:1.35; }
 
-  .songBox{
-    display:flex;
-    gap:10px;
-    align-items:center;
-  }
-  .songSearch{
-    flex:1;
-  }
+  .songBox{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .songSearch{ flex:1 1 240px; min-width:180px; }
+
   .btn{
     border:none;
     cursor:pointer;
-    padding: 12px 14px;
-    border-radius: 16px;
-    font-weight: 950;
-    letter-spacing:.2px;
+    padding:12px 14px;
+    border-radius:16px;
+    font-weight:950;
     background: linear-gradient(180deg,var(--agave),var(--agave2));
     color:white;
-    box-shadow: 0 14px 28px rgba(46,93,80,.18);
+    box-shadow:0 14px 28px rgba(46,93,80,.18);
     white-space:nowrap;
   }
   .btnGhost{
     background: rgba(46,93,80,.08);
     border: 1px solid rgba(46,93,80,.16);
     color: var(--agave);
-    box-shadow: none;
+    box-shadow:none;
   }
 
-  .results{
-    margin-top: 10px;
-    display:grid;
-    gap:10px;
+  /* ===== Song results collapsible ===== */
+  .songResultsWrap{
+    margin-top:10px;
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(199,169,107,.25);
+    background: rgba(199,169,107,.08);
   }
+  .songResultsHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .songResultsHeader .hTitle{ font-weight:950; font-size:13px; color:rgba(29,43,39,.78); }
+  .songResultsHeader .chev{
+    width:32px;height:32px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    background: rgba(46,93,80,.10);
+    border: 1px solid rgba(46,93,80,.14);
+    font-weight:950;
+    color:var(--agave);
+    flex:0 0 auto;
+  }
+  .songResultsPanel{
+    max-height:520px;
+    overflow:auto;
+    transition:max-height 220ms ease;
+    -webkit-overflow-scrolling:touch;
+  }
+  .songResultsWrap.collapsed .songResultsPanel{ max-height:0px; overflow:hidden; }
+
+  .results{ padding:10px; display:grid; gap:10px; }
+
   .result{
     display:flex;
     gap:12px;
     align-items:center;
-    background: rgba(199,169,107,.12);
-    border: 1px solid rgba(199,169,107,.25);
-    border-radius: 18px;
-    padding: 10px 10px;
+    background: rgba(255,255,255,.75);
+    border:1px solid rgba(199,169,107,.22);
+    border-radius:18px;
+    padding:10px 10px;
     cursor:pointer;
     user-select:none;
+    min-width:0;
+    overflow:hidden;
   }
   .cover{
     width:54px;height:54px;border-radius:14px;object-fit:cover;
     background: linear-gradient(180deg, rgba(46,93,80,.18), rgba(199,169,107,.18));
-    box-shadow: 0 12px 24px rgba(0,0,0,.10);
+    box-shadow:0 12px 24px rgba(0,0,0,.10);
     flex:0 0 auto;
   }
   .rmeta{ flex:1; min-width:0; }
-  .rtitle{
-    font-weight: 950;
-    font-size: 14px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .rartist{
-    margin-top:2px;
-    font-size: 12px;
-    opacity:.75;
-    font-weight: 750;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
+  .rtitle,.rartist{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rtitle{ font-weight:950; font-size:14px; }
+  .rartist{ margin-top:2px; font-size:12px; opacity:.75; font-weight:750; }
+
   .pick{
-    font-weight: 950;
-    color: var(--agave);
-    padding: 10px 12px;
-    border-radius: 14px;
+    flex:0 0 auto;
+    font-weight:950;
+    color:var(--agave);
+    padding:10px 12px;
+    border-radius:14px;
     background: rgba(46,93,80,.10);
     border: 1px solid rgba(46,93,80,.16);
+    white-space:nowrap;
+  }
+  .pickDanger{
+    background: rgba(0,0,0,.06);
+    border: 1px solid rgba(0,0,0,.08);
+    color: rgba(0,0,0,.65);
   }
 
+  /* ===== CHOSEN (FIX: allow wrap, never explode) ===== */
   .chosen{
-    margin-top: 12px;
-    border-radius: 20px;
-    border: 1px solid rgba(46,93,80,.12);
+    margin-top:12px;
+    border-radius:20px;
+    border:1px solid rgba(46,93,80,.12);
     background: rgba(255,255,255,.75);
-    padding: 12px 12px;
-    display:flex;
+    padding:12px 12px;
+    display:none;
     gap:12px;
     align-items:center;
-  }
-  .chosen .cover{ width:62px;height:62px; }
-  .chosen .rtitle{ font-size: 15px; }
-  .chosen small{ opacity:.7; font-weight:800; }
+    min-width:0;
+    overflow:hidden;
 
-  .footerRow{
-    margin-top: 14px;
+    flex-wrap: wrap;          /* <<< KEY FIX */
+  }
+  .chosen .cover{ width:62px;height:62px; flex:0 0 auto; }
+
+  .chosenMeta{
+    flex: 1 1 220px;          /* allows shrinking */
+    min-width: 0;             /* required for ellipsis */
+  }
+  .chosenMeta .t,.chosenMeta .a,.chosenMeta .i{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .chosenMeta .t{ font-weight:950; font-size:15px; }
+  .chosenMeta .a{ margin-top:2px; font-size:12px; opacity:.75; font-weight:800; }
+  .chosenMeta .i{ margin-top:2px; font-size:12px; opacity:.65; font-weight:800; }
+
+  .chosenRight{
     display:flex;
     gap:10px;
-    flex-wrap:wrap;
+    align-items:center;
+    flex: 0 0 auto;
   }
+
+  /* On very small widths, move buttons to their own row aligned right */
+  @media (max-width: 420px){
+    .chosenRight{
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+
+  .footerRow{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+
   .toast{
-    margin-top: 14px;
-    padding: 12px 12px;
-    border-radius: 16px;
+    margin-top:14px;
+    padding:12px 12px;
+    border-radius:16px;
     background: rgba(46,93,80,.10);
     border: 1px solid rgba(46,93,80,.14);
     color: var(--agave);
-    font-weight: 850;
+    font-weight:850;
     display:none;
   }
 
   .preview{
-    margin-top: 14px;
-    border-radius: 26px;
+    margin-top:14px;
+    border-radius:26px;
     overflow:hidden;
-    border: 1px solid rgba(46,93,80,.12);
-    box-shadow: 0 18px 42px rgba(0,0,0,.08);
+    border:1px solid rgba(46,93,80,.12);
+    box-shadow:0 18px 42px rgba(0,0,0,.08);
     background:white;
   }
   .preview .pimg{
-    height: 260px;
+    height:260px;
     background: linear-gradient(180deg, rgba(46,93,80,.12), rgba(199,169,107,.12));
     display:flex;align-items:center;justify-content:center;
     overflow:hidden;
   }
   .preview .pimg img{ width:100%;height:100%;object-fit:cover; display:block; }
-  .preview .pbody{ padding: 14px 14px 16px; }
-  .preview .pname{ font-weight: 950; color: var(--agave); font-size: 18px; }
-  .preview .pplace{ opacity:.7; font-weight:850; font-size: 12px; margin-top:2px; }
+  .preview .pbody{ padding:14px 14px 16px; }
+  .preview .pname{ font-weight:950; color:var(--agave); font-size:18px; }
+  .preview .pplace{ opacity:.7; font-weight:850; font-size:12px; margin-top:2px; }
   .preview .ptext{ margin-top:10px; white-space:pre-wrap; line-height:1.35; }
 </style>
 </head>
@@ -273,28 +284,41 @@
         <div class="songBox">
           <input id="photo" class="songSearch" placeholder="Bild-URL (optional) z.B. https://…" />
           <button class="btn btnGhost" id="randomPhoto" type="button">Zufallsfoto</button>
+          <button class="btn" id="selfieBtn" type="button">Selfie</button>
         </div>
-        <div class="hint">Im echten Modus könntest du hier Upload (iPhone Kamera) einbauen. Für Demo reicht eine URL.</div>
+        <input type="file" id="cameraInput" accept="image/*" capture="user" style="display:none">
+        <div class="hint">Selfie öffnet die Frontkamera. (Speichern/Upload bauen wir später.)</div>
       </div>
 
       <div class="field">
         <label>Lieblingssong (Apple Music / iTunes Suche)</label>
         <div class="songBox">
-          <input id="songQuery" class="songSearch" placeholder="z.B. message in a bottle (The Police)" />
+          <input id="songQuery" class="songSearch" placeholder="" autocomplete="off" />
           <button class="btn" id="songSearchBtn" type="button">Suchen</button>
         </div>
-        <div class="hint">Tippe unten einen Treffer an — dann wird er übernommen.</div>
+        <div class="hint">Suchbegriff eingeben → Treffer antippen → wird übernommen (danach klappt die Liste ein).</div>
 
-        <div class="results" id="results" aria-live="polite"></div>
-
-        <div class="chosen" id="chosen" style="display:none;">
-          <img class="cover" id="chosenCover" alt="">
-          <div class="rmeta">
-            <div class="rtitle" id="chosenTitle">—</div>
-            <div class="rartist" id="chosenArtist">—</div>
-            <small id="chosenInfo">—</small>
+        <div class="songResultsWrap" id="songResultsWrap" style="display:none;">
+          <div class="songResultsHeader" id="songResultsHeader">
+            <div class="hTitle" id="songHeaderTitle">Suchergebnisse</div>
+            <div class="chev" id="songChev">⌃</div>
           </div>
-          <a class="pick" id="chosenOpen" href="#" target="_blank" rel="noopener">Öffnen</a>
+          <div class="songResultsPanel">
+            <div class="results" id="results"></div>
+          </div>
+        </div>
+
+        <div class="chosen" id="chosen">
+          <img class="cover" id="chosenCover" alt="">
+          <div class="chosenMeta">
+            <div class="t" id="chosenTitle">—</div>
+            <div class="a" id="chosenArtist">—</div>
+            <div class="i" id="chosenInfo">—</div>
+          </div>
+          <div class="chosenRight">
+            <a class="pick" id="chosenOpen" href="#" target="_blank" rel="noopener">Öffnen</a>
+            <button class="pick pickDanger" id="chosenClear" type="button">X</button>
+          </div>
         </div>
       </div>
 
@@ -314,6 +338,7 @@
           <div class="pplace" id="pplace">—</div>
           <div class="ptext" id="ptext">—</div>
           <div class="hint" id="pkacki" style="margin-top:10px;font-weight:900;">—</div>
+          <div class="hint" id="psong" style="margin-top:8px;">—</div>
         </div>
       </div>
 
@@ -322,15 +347,9 @@
 </div>
 
 <script>
-  // =========================
-  // Demo-Konfiguration
-  // =========================
-  const WALL_URL = "test.html"; // falls deine Swipe-Datei anders heißt -> anpassen
+  const WALL_URL = "guestbook-wall.html";
   const DEFAULT_PHOTO = "https://picsum.photos/1200/1600?random=80";
 
-  // =========================
-  // Elements
-  // =========================
   const elName = document.getElementById('name');
   const elPlace = document.getElementById('place');
   const elText = document.getElementById('text');
@@ -340,36 +359,34 @@
   const elSongQuery = document.getElementById('songQuery');
   const elResults = document.getElementById('results');
 
+  const songResultsWrap = document.getElementById('songResultsWrap');
+  const songResultsHeader = document.getElementById('songResultsHeader');
+  const songHeaderTitle = document.getElementById('songHeaderTitle');
+  const songChev = document.getElementById('songChev');
+
   const chosen = document.getElementById('chosen');
   const chosenCover = document.getElementById('chosenCover');
   const chosenTitle = document.getElementById('chosenTitle');
   const chosenArtist = document.getElementById('chosenArtist');
   const chosenInfo = document.getElementById('chosenInfo');
   const chosenOpen = document.getElementById('chosenOpen');
+  const chosenClear = document.getElementById('chosenClear');
 
   const toast = document.getElementById('toast');
 
-  // Preview
   const pimg = document.getElementById('pimg');
   const pname = document.getElementById('pname');
   const pplace = document.getElementById('pplace');
   const ptext = document.getElementById('ptext');
   const pkacki = document.getElementById('pkacki');
+  const psong = document.getElementById('psong');
 
-  let selectedSong = null; // { trackId, trackName, artistName, artworkUrl, trackViewUrl }
+  const cameraInput = document.getElementById('cameraInput');
+  const selfieBtn = document.getElementById('selfieBtn');
 
-  // =========================
-  // Helpers
-  // =========================
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;")
-      .replaceAll("\n","<br>");
-  }
+  let selectedSong = null;
+  let lastSearchItems = [];
+  let collapsed = false;
 
   function setPreview(){
     const n = elName.value.trim() || "—";
@@ -383,6 +400,10 @@
     ptext.textContent = t;
     pkacki.textContent = "Wie war dein Kacki heute? " + (k || "—");
 
+    psong.textContent = selectedSong
+      ? ("Lieblingssong: " + selectedSong.trackName + " – " + selectedSong.artistName)
+      : "Lieblingssong: —";
+
     if (photoUrl){
       pimg.innerHTML = `<img src="${photoUrl}" alt="">`;
     } else {
@@ -395,7 +416,7 @@
     setTimeout(() => toast.style.display = "none", 2200);
   }
 
-  function setChosen(song){
+  function showChosen(song){
     selectedSong = song;
     chosen.style.display = "flex";
     chosenCover.src = song.artworkUrl || "";
@@ -403,69 +424,105 @@
     chosenArtist.textContent = song.artistName || "—";
     chosenInfo.textContent = "Track-ID: " + (song.trackId || "—");
     chosenOpen.href = song.trackViewUrl || "#";
+    setPreview();
   }
 
-  // =========================
-  // Apple Music / iTunes Search
-  // =========================
+  function clearChosen(){
+    selectedSong = null;
+    chosen.style.display = "none";
+    chosenCover.removeAttribute('src');
+    setPreview();
+  }
+
+  function setCollapsed(v){
+    collapsed = v;
+    songResultsWrap.classList.toggle('collapsed', collapsed);
+    songChev.textContent = collapsed ? "⌄" : "⌃";
+  }
+
   async function searchSongs(q){
     elResults.innerHTML = "";
-    if (!q || q.trim().length < 2) return;
+    lastSearchItems = [];
+    songResultsWrap.style.display = "none";
 
-    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=6&country=DE`;
+    if (!q || q.trim().length < 2) {
+      songResultsWrap.style.display = "block";
+      songHeaderTitle.textContent = "Bitte mindestens 2 Zeichen";
+      elResults.innerHTML = `<div class="hint" style="padding:10px;">Bitte mindestens 2 Zeichen eingeben.</div>`;
+      setCollapsed(false);
+      return;
+    }
+
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=8&country=DE`;
+
     try{
       const res = await fetch(url);
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
       const items = (data.results || []).filter(r => r.wrapperType === "track");
+      lastSearchItems = items;
+
+      songResultsWrap.style.display = "block";
+      songHeaderTitle.textContent = `Suchergebnisse (${items.length})`;
+      setCollapsed(false);
 
       if (!items.length){
-        elResults.innerHTML = `<div class="hint">Keine Treffer gefunden.</div>`;
+        elResults.innerHTML = `<div class="hint" style="padding:10px;">Keine Treffer gefunden.</div>`;
         return;
       }
 
       elResults.innerHTML = items.map((r, i) => {
         const cover = (r.artworkUrl100 || "").replace("100x100","200x200");
+        const title = (r.trackName || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+        const artist = (r.artistName || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
         return `
-          <div class="result" data-i="${i}">
+          <div class="result" data-idx="${i}">
             <img class="cover" src="${cover}" alt="">
             <div class="rmeta">
-              <div class="rtitle">${escapeHtml(r.trackName || "")}</div>
-              <div class="rartist">${escapeHtml(r.artistName || "")}</div>
+              <div class="rtitle">${title}</div>
+              <div class="rartist">${artist}</div>
             </div>
             <div class="pick">Wählen</div>
           </div>
         `;
       }).join("");
 
-      // click handlers
-      [...elResults.querySelectorAll(".result")].forEach(node => {
-        node.addEventListener("click", () => {
-          const i = Number(node.getAttribute("data-i"));
-          const r = items[i];
-
-          setChosen({
-            trackId: r.trackId,
-            trackName: r.trackName,
-            artistName: r.artistName,
-            artworkUrl: (r.artworkUrl100 || "").replace("100x100","600x600"),
-            trackViewUrl: r.trackViewUrl
-          });
-        });
-      });
-
     }catch(e){
-      elResults.innerHTML = `<div class="hint">Suche fehlgeschlagen (z.B. kein Internet im Gastnetz). In Demo egal 🙂</div>`;
+      songResultsWrap.style.display = "block";
+      songHeaderTitle.textContent = "Suche fehlgeschlagen";
+      elResults.innerHTML = `<div class="hint" style="padding:10px;">Suche fehlgeschlagen (z.B. kein Internet). In Demo egal 🙂</div>`;
+      setCollapsed(false);
     }
   }
 
-  // =========================
-  // Events
-  // =========================
-  document.getElementById('songSearchBtn').addEventListener('click', () => {
-    searchSongs(elSongQuery.value);
+  elResults.addEventListener('pointerdown', (e) => {
+    const row = e.target.closest('.result');
+    if (!row) return;
+    e.preventDefault();
+  }, { passive:false });
+
+  elResults.addEventListener('click', (ev) => {
+    const row = ev.target.closest('.result');
+    if (!row) return;
+
+    const i = Number(row.getAttribute('data-idx'));
+    const r = lastSearchItems[i];
+    if (!r) return;
+
+    showChosen({
+      trackId: r.trackId,
+      trackName: r.trackName,
+      artistName: r.artistName,
+      artworkUrl: (r.artworkUrl100 || "").replace("100x100","600x600"),
+      trackViewUrl: r.trackViewUrl
+    });
+
+    setCollapsed(true);
   });
 
+  songResultsHeader.addEventListener('click', () => setCollapsed(!collapsed));
+
+  document.getElementById('songSearchBtn').addEventListener('click', () => searchSongs(elSongQuery.value));
   elSongQuery.addEventListener('keydown', (e) => {
     if (e.key === "Enter"){
       e.preventDefault();
@@ -473,18 +530,25 @@
     }
   });
 
+  chosenClear.addEventListener('click', () => { clearChosen(); setCollapsed(false); });
+
   document.getElementById('randomPhoto').addEventListener('click', () => {
     elPhoto.value = "https://picsum.photos/1200/1600?random=" + Math.floor(Math.random()*1000);
     setPreview();
   });
 
-  document.getElementById('submit').addEventListener('click', () => {
-    // Demo: wir zeigen nur Toast + Vorschau, speichern NICHTS
-    // Hier würdest du später in ioBroker schreiben (0_userdata.0.guestbook.entries) oder per REST endpoint.
-    showToast();
+  selfieBtn.addEventListener('click', () => cameraInput.click());
+  cameraInput.addEventListener('change', () => {
+    const file = cameraInput.files && cameraInput.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    elPhoto.value = url;
+    setPreview();
+  });
 
-    // Optional: Konsolen-Output als “Pseudo-Speichern”
-    const payload = {
+  document.getElementById('submit').addEventListener('click', () => {
+    showToast();
+    console.log("DEMO payload:", {
       name: elName.value.trim(),
       place: elPlace.value.trim(),
       text: elText.value.trim(),
@@ -493,24 +557,13 @@
       appleTrackId: selectedSong?.trackId || null,
       appleTrackUrl: selectedSong?.trackViewUrl || null,
       created: Date.now()
-    };
-    console.log("DEMO payload:", payload);
+    });
   });
 
-  document.getElementById('toWall').addEventListener('click', () => {
-    location.href = WALL_URL;
-  });
+  document.getElementById('toWall').addEventListener('click', () => location.href = WALL_URL);
 
-  [elName, elPlace, elText, elKacki, elPhoto].forEach(el => {
-    el.addEventListener('input', setPreview);
-  });
-
-  // init defaults
-  elPhoto.value = "";
-  elSongQuery.value = "Message in a Bottle";
+  [elName, elPlace, elText, elKacki, elPhoto].forEach(el => el.addEventListener('input', setPreview));
   setPreview();
-  // optional: direkt Demo-Suche starten
-  searchSongs(elSongQuery.value);
 </script>
 </body>
 </html>
