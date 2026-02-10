@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8">
+<title>Token Hash Generator</title>
+<style>
+body{font-family:system-ui;padding:40px;text-align:center}
+input{padding:12px;font-size:18px;width:320px}
+button{padding:12px 20px;font-size:18px;margin-left:8px}
+pre{margin-top:20px;font-size:16px}
+</style>
+
+<h2>Token → SHA256</h2>
+
+<input id="token" placeholder="Token eingeben">
+<button onclick="go()">Hash erzeugen</button>
+
+<pre id="out"></pre>
+
+<script>
+async function go(){
+  const t = document.getElementById('token').value;
+  const enc = new TextEncoder().encode(t);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  const hex = [...new Uint8Array(buf)]
+      .map(b=>b.toString(16).padStart(2,"0"))
+      .join("");
+  document.getElementById('out').textContent = hex;
+}
+</script>
+</html>
