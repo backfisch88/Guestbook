@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LAN Redirect Test</title>
 
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <style>
 body{
   font-family:system-ui;
@@ -12,7 +15,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  height:100vh;
+  min-height:101vh; /* wichtig für Safari */
   background:#f2f2f2;
 }
 .box{
@@ -52,7 +55,13 @@ button{
 const INTERNAL_URL = "http://192.168.178.10:8082";
 const TIMEOUT_MS = 3000;
 
+function hideSafariBar(){
+  setTimeout(() => window.scrollTo(0,1), 60);
+}
+
 function start(){
+  hideSafariBar();
+
   document.getElementById("status").textContent = "Versuche Verbindung…";
 
   let leftPage = false;
@@ -61,12 +70,10 @@ function start(){
     leftPage = true;
   });
 
-  // Redirect versuchen
   setTimeout(() => {
     window.location.href = INTERNAL_URL;
   }, 500);
 
-  // Timeout prüfen
   setTimeout(() => {
     if(!leftPage){
       document.getElementById("status").textContent =
@@ -75,7 +82,10 @@ function start(){
   }, TIMEOUT_MS);
 }
 
-start();
+window.addEventListener("load", () => {
+  hideSafariBar();
+  start();
+});
 </script>
 
 </body>
