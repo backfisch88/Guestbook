@@ -385,6 +385,35 @@
 </div>
 
 <script>
+
+
+
+  const PROBE = "http://192.168.178.1";   // Fritzbox
+const REDIRECT = "http://192.168.178.1"; // Zielseite
+
+function testWifi(){
+  const img = new Image();
+  const timeout = setTimeout(() => {
+    document.getElementById("status").textContent = "Nicht im Heim-WLAN";
+  }, 2000);
+
+  img.onload = () => {
+    clearTimeout(timeout);
+    document.getElementById("status").textContent = "Heim-WLAN erkannt ✓";
+    setTimeout(() => {
+      window.location.href = REDIRECT;
+    }, 1000);
+  };
+
+  img.onerror = () => {
+    clearTimeout(timeout);
+    document.getElementById("status").textContent = "Nicht im Heim-WLAN";
+  };
+
+  img.src = PROBE + "/favicon.ico?_=" + Date.now();
+}
+
+testWifi();
   // ====== CONFIG ======
   const SSID = "Pretty fly for a WIFI";
   const GUESTBOOK_URL = "http://192.168.178.10:8082/vis/guestbook/guestbook-wall.html";
