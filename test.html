@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Willkommen</title>
+<title> </title>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,55 +11,152 @@
 <style>
   :root{
     --agave:#2e5d50;
+    --agave2:#244d43;
+    --gold:#c7a96b;
     --bg1:#e7efe9;
     --bg2:#f4f1ea;
   }
   html,body{height:100%;}
   body{
     margin:0;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    background: radial-gradient(900px 500px at 50% 0%, rgba(46,93,80,.10), transparent 60%),
-                linear-gradient(180deg,var(--bg1),var(--bg2));
+    background:
+      radial-gradient(1000px 600px at 50% 10%, rgba(199,169,107,.22), transparent 60%),
+      radial-gradient(900px 500px at 50% 0%, rgba(46,93,80,.12), transparent 60%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
     display:grid;
     place-items:center;
-    min-height:101vh; /* damit Safari-Leiste einklappt */
+    min-height:101vh; /* Safari-Bar einklappen */
+    overflow:hidden;
   }
-  .card{
-    width:min(520px,92vw);
-    background:rgba(255,255,255,.70);
-    border:1px solid rgba(0,0,0,.06);
-    border-radius:22px;
-    box-shadow:0 18px 50px rgba(0,0,0,.10);
-    padding:22px 18px;
-    text-align:center;
+
+  .stage{
+    width:min(360px, 80vw);
+    height:min(360px, 80vw);
+    display:grid;
+    place-items:center;
+    position:relative;
   }
-  .title{font-size:22px;font-weight:900;margin:2px 0 6px;}
-  .sub{opacity:.7;margin:0 0 14px;}
-  .spinner{
-    width:44px;height:44px;border-radius:999px;
-    border:4px solid rgba(46,93,80,.18);
-    border-top-color: rgba(46,93,80,.9);
-    margin: 10px auto 2px;
-    animation: spin 1s linear infinite;
+
+  .glow{
+    position:absolute;
+    inset:-40px;
+    border-radius:999px;
+    background: radial-gradient(circle at 50% 50%,
+      rgba(199,169,107,.22),
+      rgba(46,93,80,.12),
+      transparent 65%);
+    filter: blur(10px);
+    animation: glow 2.2s ease-in-out infinite;
+    opacity:.9;
   }
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .small{opacity:.65;font-size:13px;margin-top:10px}
+  @keyframes glow{
+    0%,100%{ transform: scale(.92); opacity:.70; }
+    50%{ transform: scale(1.06); opacity:1; }
+  }
+
+  .wifi{
+    width:220px;
+    height:220px;
+    position:relative;
+    display:grid;
+    place-items:center;
+  }
+
+  .ring{
+    position:absolute;
+    inset:0;
+    border-radius:999px;
+    border: 2px solid rgba(46,93,80,.10);
+    box-shadow: inset 0 0 0 14px rgba(46,93,80,.03);
+    background: radial-gradient(circle at 50% 45%,
+      rgba(255,255,255,.85),
+      rgba(255,255,255,.55) 55%,
+      rgba(255,255,255,0) 74%);
+  }
+
+  svg{
+    width:140px;
+    height:140px;
+    filter: drop-shadow(0 12px 22px rgba(0,0,0,.14));
+  }
+
+  .arc{
+    fill:none;
+    stroke: rgba(46,93,80,.92);
+    stroke-width:10;
+    stroke-linecap:round;
+    opacity:.18;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .arc.a2{ animation-delay:.18s; opacity:.26; }
+  .arc.a3{ animation-delay:.36s; opacity:.34; }
+  .dot{
+    fill: rgba(46,93,80,.92);
+    opacity:.55;
+    animation: dot 1.6s ease-in-out infinite;
+    animation-delay:.52s;
+  }
+
+  @keyframes pulse{
+    0%{ opacity:.10; transform: scale(.98); }
+    50%{ opacity:.95; transform: scale(1.03); }
+    100%{ opacity:.12; transform: scale(.98); }
+  }
+  @keyframes dot{
+    0%{ opacity:.20; transform: scale(.96); }
+    55%{ opacity:1; transform: scale(1.08); }
+    100%{ opacity:.25; transform: scale(.96); }
+  }
+
+  /* tiny “signal sweep” */
+  .sweep{
+    position:absolute;
+    width:260px;
+    height:260px;
+    border-radius:999px;
+    background: conic-gradient(from 180deg,
+      rgba(199,169,107,0) 0deg,
+      rgba(199,169,107,.18) 35deg,
+      rgba(199,169,107,0) 70deg,
+      rgba(199,169,107,0) 360deg);
+    filter: blur(1px);
+    animation: sweep 2.6s linear infinite;
+    opacity:.55;
+    mix-blend-mode:multiply;
+  }
+  @keyframes sweep{
+    to{ transform: rotate(360deg); }
+  }
+
+  /* prevent selection/zoom highlight */
+  *{ -webkit-tap-highlight-color: transparent; user-select:none; }
 </style>
 </head>
 
 <body>
-  <div class="card">
-    <div class="title">Einen Moment…</div>
-    <p class="sub" id="msg">Verbindung wird geprüft</p>
-    <div class="spinner" aria-hidden="true"></div>
-    <div class="small">Falls nichts passiert: WLAN verbinden und erneut öffnen.</div>
+  <div class="stage" aria-label="Loading">
+    <div class="glow"></div>
+    <div class="sweep" aria-hidden="true"></div>
+
+    <div class="wifi">
+      <div class="ring" aria-hidden="true"></div>
+
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <!-- arcs -->
+        <path class="arc a3" d="M35 90 Q100 35 165 90" />
+        <path class="arc a2" d="M55 110 Q100 75 145 110" />
+        <path class="arc a1" d="M75 130 Q100 110 125 130" />
+        <!-- dot -->
+        <circle class="dot" cx="100" cy="150" r="10"/>
+      </svg>
+    </div>
   </div>
 
 <script>
   // ====== HIER ANPASSEN ======
   const INTERNAL_URL = "http://192.168.178.10:8082/vis/guestbook/guestbook-wall.html";
-  const QR_FALLBACK_URL = "index.html"; // deine QR-Seite auf GitHub Pages
-  const TIMEOUT_MS = 2200;               // wie schnell fallbacken?
+  const QR_FALLBACK_URL = "wifi-qr.html";
+  const TIMEOUT_MS = 2200;
   // ==========================
 
   // Safari-Leiste einklappen
@@ -68,18 +165,14 @@
   let left = false;
   window.addEventListener("pagehide", () => { left = true; });
 
-  // Direkt versuchen intern zu öffnen
+  // intern versuchen
   setTimeout(() => {
-    document.getElementById("msg").textContent = "Öffne interne Seite…";
     window.location.href = INTERNAL_URL;
-  }, 200);
+  }, 180);
 
-  // Wenn nicht geklappt: auf QR-Seite
+  // fallback auf QR-Seite
   setTimeout(() => {
-    if (!left) {
-      document.getElementById("msg").textContent = "WLAN nicht verbunden – zeige QR-Code…";
-      window.location.replace(QR_FALLBACK_URL);
-    }
+    if (!left) window.location.replace(QR_FALLBACK_URL);
   }, TIMEOUT_MS);
 </script>
 </body>
