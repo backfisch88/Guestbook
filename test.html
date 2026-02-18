@@ -1,30 +1,57 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LAN Test</title></head>
-<body style="font-family:system-ui;display:grid;place-items:center;height:100vh;margin:0;background:#f2f2f2">
-<div style="background:#fff;padding:20px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);text-align:center;width:min(420px,92vw)">
-  <div id="t" style="font-weight:900;font-size:18px">Prüfe LAN…</div>
-  <div id="s" style="opacity:.7;margin-top:6px"></div>
-  <button onclick="run()" style="margin-top:14px;padding:10px 14px;border:0;border-radius:12px;background:#2e5d50;color:#fff;font-weight:800">Nochmal testen</button>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LAN Redirect Test</title>
+
+<style>
+body{
+  font-family:system-ui;
+  margin:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  background:#f2f2f2;
+}
+.box{
+  background:#fff;
+  padding:28px;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+  text-align:center;
+}
+button{
+  margin-top:16px;
+  padding:12px 16px;
+  border:0;
+  border-radius:12px;
+  background:#2e5d50;
+  color:#fff;
+  font-weight:800;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Verbindung wird geprüft…</h2>
+  <p>Wenn du im Heim-WLAN bist, öffnet sich gleich die interne Seite.</p>
+  <button onclick="go()">Jetzt testen</button>
 </div>
+
 <script>
-const PROBE = "http://192.168.178.10:8082"; // <-- HIER dein interner Dienst
-const TIMEOUT_MS = 2200;
+const INTERNAL_URL = "http://192.168.178.10:8082"; // interne Seite
 
-function ping(url){
-  return new Promise((resolve)=>{
-    const img = new Image();
-    const t = setTimeout(()=>resolve(false), TIMEOUT_MS);
-    img.onload  = ()=>{ clearTimeout(t); resolve(true); };
-    img.onerror = ()=>{ clearTimeout(t); resolve(false); };
-    img.src = url.replace(/\/$/,'') + "/?_=" + Date.now(); // robust (kein favicon nötig)
-  });
+function go(){
+  window.location.href = INTERNAL_URL;
 }
 
-async function run(){
-  document.getElementById("t").textContent = "Prüfe LAN…";
-  const ok = await ping(PROBE);
-  document.getElementById("t").textContent = ok ? "Heim-WLAN erkannt ✓" : "Nicht im Heim-WLAN";
-  document.getElementById("s").textContent = ok ? ("Probe OK: " + PROBE) : ("Probe fehlgeschlagen: " + PROBE);
-}
-run();
+// automatisch nach 2 Sekunden versuchen
+setTimeout(go, 2000);
 </script>
-</body></html>
+
+</body>
+</html>
