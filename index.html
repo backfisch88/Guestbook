@@ -378,7 +378,7 @@
     </div>
 
     <div class="ssid" style="font-size:24px;">Weiter</div>
-    <div class="note" id="step2Note">Wenn du mit dem WLAN verbunden bist, geht’s hier weiter.</div>
+    <div class="note">Wenn du mit dem WLAN verbunden bist, geht’s hier weiter.</div>
 
     <a class="btnPrimary" id="guestbookBtn" href="#" aria-disabled="true">Gästebuch öffnen</a>
   </div>
@@ -387,17 +387,7 @@
 <script>
   // ====== CONFIG ======
   const SSID = "Pretty fly for a WIFI";
-  const GUESTBOOK_URL = "guestbook-wall.html";
-
-  // ✅ WLAN-"Ping" Ziel (Browser-Reachability) – wie von dir gewünscht:
-  const INTERNAL_PROBE_URL = "http://192.168.178.1";
-
-  // ✅ Wenn Heim-WLAN erkannt: wohin weiterleiten / Button zeigen
-  // (kann auch eine konkrete interne Seite sein, z.B. http://192.168.178.20/guestbook-wall.html)
-  const INTERNAL_TARGET_URL = "http://192.168.178.1";
-
-  // true = sobald Heim-WLAN erkannt, sofort automatisch weiterleiten
-  const AUTO_REDIRECT_IF_CONNECTED = true;
+  const GUESTBOOK_URL = "http://192.168.178.10:8082/vis/guestbook/guestbook-wall.html";
 
   /**
    * Trage hier die erlaubten Token-Hashes (SHA-256 HEX) ein.
@@ -410,7 +400,7 @@
    */
   const ALLOWED_TOKEN_SHA256_HEX = [
     // Beispiel (ersetzen!):
-    // "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae"
+    "f26146a4696ed4a1768bd9cd7018fd2a42d2ee9741109b221d38d97638f36a95"
   ];
   // ====================
 
@@ -428,13 +418,11 @@
   const wrap = document.getElementById('wrap');
   const lockBadge = document.getElementById('lockBadge');
   const noteText = document.getElementById('noteText');
-  const step2Note = document.getElementById('step2Note');
 
   let revealed = false;
   let tokenOk = false;
-  let inHomeWifi = false;
 
-  // ---- Token helpers (UNVERÄNDERT aus deinem Original) ----
+  // ---- Token helpers ----
   function parseTokenFromUrl() {
     // Unterstützt:
     // 1) ?t=TOKEN
@@ -475,20 +463,6 @@
 
     const hash = await sha256Hex(token.trim());
     return ALLOWED_TOKEN_SHA256_HEX.includes(hash);
-  }
-
-  // ---- WLAN-Reachability-Check (Browser-"Ping") ----
-  // Wir laden favicon.ico vom Router. Wenn das klappt -> Heim-WLAN ok.
-  async function checkIfInHomeWifi() {
-    return new Promise((resolve) => {
-      const img = new Image();
-      const timeout = setTimeout(() => resolve(false), 1800);
-
-      img.onload = () => { clearTimeout(timeout); resolve(true); };
-      img.onerror = () => { clearTimeout(timeout); resolve(false); };
-
-      img.src = INTERNAL_PROBE_URL.replace(/\/$/, "") + "/favicon.ico?_=" + Date.now();
-    });
   }
 
   // ---- Scroll helpers (wie vorher) ----
@@ -551,15 +525,7 @@
     lockBadge.classList.remove("show");
     tapText.textContent = "Tippe auf den Fingerabdruck";
     noteText.textContent = "Tippe auf den Fingerabdruck – dann erscheint der QR-Code.";
-  }
-
-  function enableStep2(url, label, note){
-    guestBtn.href = url;
-    guestBtn.textContent = label || "Gästebuch öffnen";
-    if (note) step2Note.textContent = note;
-
     guestBtn.setAttribute("aria-disabled", "false");
-    step2Card.classList.add("show");
   }
 
   function lockedFeedback() {
@@ -568,44 +534,12 @@
   }
 
   async function init() {
-    // 1) Erst prüfen: schon im Heim-WLAN?
-    inHomeWifi = await checkIfInHomeWifi();
-
-    if (inHomeWifi) {
-      // Im Heimnetz: Button aktivieren + optional direkt weiterleiten
-      enableStep2(
-        INTERNAL_TARGET_URL,
-        "Interne Seite öffnen",
-        "Du bist mit dem WLAN verbunden – weiter geht’s intern."
-      );
-
-      tapText.textContent = "Verbunden ✓";
-
-      if (AUTO_REDIRECT_IF_CONNECTED) {
-        tapText.textContent = "Verbunden ✓ – weiterleiten …";
-        setTimeout(() => { window.location.href = INTERNAL_TARGET_URL; }, 450);
-      }
-      return;
-    }
-
-    // 2) Nicht im Heimnetz: Original-Token-Flow (wie gehabt)
     const ok = await checkToken();
     if (ok) setUnlockedUI();
     else setLockedUI();
-
-    guestBtn.href = GUESTBOOK_URL;
-    guestBtn.textContent = "Gästebuch öffnen";
-    step2Note.textContent = "Wenn du mit dem WLAN verbunden bist, geht’s hier weiter.";
-    guestBtn.setAttribute("aria-disabled", "true");
   }
 
   function revealSequence(){
-    // Wenn bereits im Heim-WLAN, ist Step2 eh aktiv (und ggf. auto-redirect)
-    if (inHomeWifi) {
-      microScrollSnapTo(step2Card);
-      return;
-    }
-
     if (!tokenOk) { lockedFeedback(); return; }
     if (revealed) return;
     revealed = true;
