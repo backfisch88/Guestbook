@@ -60,7 +60,7 @@ function testWifi(){
     document.getElementById("status").textContent = "Nicht im Heim-WLAN";
   };
 
-  img.src = PROBE + "/favicon.ico?_=" + Date.now();
+img.src = PROBE.replace(/\/$/,'') + "/?_=" + Date.now();
 }
 
 testWifi();
