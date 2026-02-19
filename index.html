@@ -25,17 +25,24 @@
   --phone-border:#111;
 }
 
-html,body{height:100%;}
-body{
+html,body{
   margin:0;
-  min-height:101vh;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
+  padding:0;
+  height:100%;
+  min-height:100vh;
   background:
-    radial-gradient(900px 520px at 50% 10%, rgba(199,169,107,.16), transparent 60%),
-    radial-gradient(820px 520px at 50% 0%, rgba(46,93,80,.14), transparent 62%),
+    radial-gradient(1200px 700px at 50% 0%, rgba(199,169,107,.18), transparent 60%),
+    radial-gradient(1000px 700px at 50% 20%, rgba(46,93,80,.16), transparent 65%),
     linear-gradient(180deg,var(--bg1),var(--bg2));
+  background-attachment: fixed;
+}
+
+/* Stage bleibt fürs Centering */
+body{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
 }
 
 .stage{
