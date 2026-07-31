@@ -234,9 +234,6 @@ body{
     <div class="center">
       <!-- WiFi -->
       <div class="wifiWrap" id="wifiWrap" aria-hidden="true">
-        <!-- dein SVG (exakt), nur:
-             - viewBox beibehalten
-             - fill/stroke im <g> entfernen / überschreiben -> wir nutzen Klassen -->
         <svg xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 600 455" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
           <defs>
@@ -246,9 +243,6 @@ body{
             </linearGradient>
           </defs>
 
-          <!-- NOTE: wir übernehmen exakt deine Pfade.
-               Der ursprüngliche <g> hatte fill="#000000".
-               Hier setzen wir fill="none" am g und geben jedem path seine Klasse/Fill. -->
           <g transform="translate(0,455) scale(0.1,-0.1)" fill="none" stroke="none">
 
             <path class="wifiPath p1"
@@ -260,7 +254,6 @@ body{
             <path class="wifiPath p3"
               d="M3040 1784 c-14 -2 -65 -11 -115 -20 -49 -9 -111 -22 -137 -31 -52 -17 -226 -103 -273 -136 -56 -39 -145 -119 -145 -131 0 -13 761 -776 774 -776 18 0 766 755 766 773 0 51 -259 219 -417 270 -118 38 -369 67 -453 51z"/>
 
-            <!-- (Optional) Shine layer: die gleichen Pfade als subtile Lichtkante -->
             <path class="shine"
               d="M2950 3999 c-80 -4 -188 -15 -240 -24 -52 -9 -126 -21 -164 -27 -296 -42 -742 -203 -1020 -367 -48 -28 -89 -51 -91 -51 -3 0 -45 -25 -94 -55 -212 -131 -531 -397 -531 -443 0 -25 508 -532 533 -532 10 0 60 37 111 83 50 46 127 111 171 144 80 60 289 188 375 230 128 62 199 92 240 103 25 7 50 15 55 19 30 22 309 93 450 114 212 33 385 41 553 28 442 -36 796 -145 1146 -353 154 -92 248 -159 370 -266 54 -48 107 -93 118 -101 17 -13 38 6 283 250 146 145 265 271 265 280 0 36 -275 272 -470 403 -97 65 -329 197 -417 237 -26 12 -77 35 -112 51 -74 34 -214 89 -286 114 -53 18 -334 91 -400 104 -256 52 -563 73 -845 59z"/>
           </g>
@@ -279,14 +272,14 @@ body{
 
 <script>
 /* ==========================
-   EXTERN ROUTER LOGIC
+   INTERNAL CONNECTIVITY CHECK
    ========================== */
 const INTERNAL_OK_URL   = "http://192.168.178.10:8082/vis/guestbook/internal-ok.html";
 const EXTERNAL_FALLBACK = "index1.html";
 
-const SEARCH_TIME_MS = 1600;
-const TIMEOUT_MS     = 2800;
-const SHOW_RESULT_MS = 1000;
+const SEARCH_TIME_MS = 1600;   // Wartezeit fürs "Such"-Gefühl (WiFi-Icon pulsiert)
+const CHECK_TIMEOUT_MS = 1500; // wie lange der eigentliche Connectivity-Test max. dauern darf
+const SHOW_RESULT_MS = 1000;   // wie lange das X sichtbar bleibt, bevor's weitergeht
 
 // Safari-Bar einklappen
 setTimeout(()=>window.scrollTo(0,1),60);
@@ -309,31 +302,48 @@ const phone = document.getElementById("phone");
 const result = document.getElementById("result");
 const resultPath = document.getElementById("resultPath");
 
-let left=false;
-window.addEventListener("pagehide",()=>left=true);
+// Echter Reachability-Test: schlägt fehl, wenn die interne IP
+// nicht erreichbar ist (z.B. weil man nicht im WLAN ist).
+// mode:'no-cors' reicht, da wir den Inhalt nicht lesen müssen -
+// uns interessiert nur, ob der Request überhaupt durchkommt.
+function testInternalConnection(url, timeoutMs){
+  return new Promise((resolve) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => { controller.abort(); resolve(false); }, timeoutMs);
+    fetch(url, { mode: 'no-cors', cache: 'no-store', signal: controller.signal })
+      .then(() => { clearTimeout(timer); resolve(true); })
+      .catch(() => { clearTimeout(timer); resolve(false); });
+  });
+}
 
-// 1) Intern versuchen
-setTimeout(()=>{
-  window.location.href = INTERNAL_OK_URL + tokenSuffix;
-}, SEARCH_TIME_MS);
-
-// 2) Wenn noch hier: WiFi -> X + extern weiter
-setTimeout(()=>{
-  if(left) return;
-
+function showErrorAndRedirect(){
   phone.classList.add("err","morphing");
 
-  setTimeout(()=>{
+  setTimeout(() => {
     result.classList.add("show","pop");
     resultPath.setAttribute("stroke","var(--err)");
     resultPath.setAttribute("d","M30 30 L70 70 M70 30 L30 70");
   }, 160);
 
-  setTimeout(()=>{
+  setTimeout(() => {
     window.location.replace(EXTERNAL_FALLBACK + tokenSuffix);
   }, 160 + SHOW_RESULT_MS);
+}
 
-}, TIMEOUT_MS);
+(async () => {
+  // kurze Wartezeit, damit die Such-Animation sichtbar bleibt
+  await new Promise(r => setTimeout(r, SEARCH_TIME_MS));
+
+  const reachable = await testInternalConnection(INTERNAL_OK_URL + tokenSuffix, CHECK_TIMEOUT_MS);
+
+  if (reachable) {
+    // Im WLAN -> direkt zur internen Seite
+    window.location.href = INTERNAL_OK_URL + tokenSuffix;
+  } else {
+    // Nicht im WLAN -> X anzeigen, dann zum QR-Fallback
+    showErrorAndRedirect();
+  }
+})();
 </script>
 </body>
 </html>
