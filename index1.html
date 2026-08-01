@@ -188,14 +188,24 @@
                 filter .65s cubic-bezier(.2,.9,.2,1);
   }
 
+  /* QR-Container statt <img> - QRCode.js haengt hier ein <canvas> rein */
   .qrImg{
     width: 198px;
-    height:auto;
+    height: 198px;
     border-radius: 18px;
     background:#fff;
     padding: 14px;
     box-shadow: 0 18px 40px rgba(0,0,0,.14);
     border: 1px solid rgba(0,0,0,.05);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .qrImg canvas, .qrImg img{
+    width: 100% !important;
+    height: 100% !important;
+    display:block;
+    border-radius: 6px;
   }
 
   .qrHint{
@@ -352,7 +362,7 @@
       <div class="circleGlass"></div>
       <img src="fingerprint.png" class="fingerBg" alt="Fingerprint">
       <div class="qrLayer" id="qrLayer" aria-hidden="true">
-        <img class="qrImg" src="IMG_9009.jpeg" alt="WLAN QR Code">
+        <div class="qrImg" id="qrcode"></div>
       </div>
     </div>
 
@@ -384,9 +394,14 @@
   </div>
 </div>
 
+<!-- QR-Code Bibliothek (lokal-freundlich, generiert QR clientseitig -> immer scharf) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
   // ====== CONFIG ======
   const SSID = "Pretty fly for a WIFI";
+  const WIFI_PASSWORD = "Dolcegusto79";
+  const WIFI_AUTH = "WPA"; // WPA/WPA2 werden beide als "WPA" im QR-Standard codiert
   const GUESTBOOK_URL = "guestbook-wall.html";
 
   /**
@@ -422,6 +437,30 @@
 
   let revealed = false;
   let tokenOk = false;
+
+  // ---- WIFI-QR-String bauen ----
+  // Standard: WIFI:T:<WPA|WEP|nopass>;S:<SSID>;P:<Passwort>;H:<true|false>;;
+  // Sonderzeichen \ ; , " muessen escaped werden.
+  function escapeWifiField(str){
+    return String(str).replace(/([\\;,"])/g, '\\$1');
+  }
+
+  function buildWifiString(ssid, password, auth){
+    const s = escapeWifiField(ssid);
+    const p = escapeWifiField(password);
+    return `WIFI:T:${auth};S:${s};P:${p};H:false;;`;
+  }
+
+  function renderQrCode(){
+    const container = document.getElementById('qrcode');
+    container.innerHTML = ""; // vorherigen Inhalt leeren (falls neu gerendert wird)
+    new QRCode(container, {
+      text: buildWifiString(SSID, WIFI_PASSWORD, WIFI_AUTH),
+      width: 400,   // hohe interne Aufloesung -> beim Skalieren auf 198px bleibt es scharf
+      height: 400,
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
 
   // ---- Token helpers ----
   function parseTokenFromUrl() {
@@ -535,6 +574,7 @@
   }
 
   async function init() {
+    renderQrCode(); // QR sofort im Hintergrund rendern, wird erst spaeter sichtbar gemacht
     const ok = await checkToken();
     if (ok) setUnlockedUI();
     else setLockedUI();
