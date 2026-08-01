@@ -222,6 +222,12 @@ body{
 }
 
 *{-webkit-tap-highlight-color:transparent; user-select:none;}
+
+#choiceBox.show{
+  opacity:1 !important;
+  transform: translateY(0) !important;
+  pointer-events:auto !important;
+}
 </style>
 </head>
 
@@ -283,6 +289,52 @@ body{
       font-family:ui-monospace,monospace;
     "></div>
   </div>
+
+  <div id="choiceBox" style="
+    margin-top:22px;
+    width:min(270px,66vw);
+    opacity:0;
+    transform: translateY(10px);
+    transition: opacity .4s ease, transform .4s ease;
+    pointer-events:none;
+  ">
+    <p style="
+      text-align:center;
+      color:var(--agave);
+      font-family:system-ui,-apple-system,sans-serif;
+      font-size:14px;
+      margin:0 0 12px;
+    ">Bist du schon mit dem Gäste-WLAN verbunden?</p>
+
+    <a id="btnConnected" href="#" style="
+      display:block;
+      text-align:center;
+      text-decoration:none;
+      font-family:system-ui,-apple-system,sans-serif;
+      font-weight:700;
+      font-size:15px;
+      color:#fff;
+      background:linear-gradient(180deg,var(--agave),#244d43);
+      border-radius:14px;
+      padding:13px 14px;
+      margin-bottom:10px;
+      box-shadow:0 12px 26px rgba(46,93,80,.22);
+    ">Ja, bin schon verbunden</a>
+
+    <a id="btnNotConnected" href="#" style="
+      display:block;
+      text-align:center;
+      text-decoration:none;
+      font-family:system-ui,-apple-system,sans-serif;
+      font-weight:700;
+      font-size:15px;
+      color:var(--agave);
+      background:rgba(255,255,255,.85);
+      border:1px solid rgba(46,93,80,.18);
+      border-radius:14px;
+      padding:13px 14px;
+    ">Nein, noch nicht</a>
+  </div>
 </div>
 
 <script>
@@ -318,6 +370,12 @@ const phone = document.getElementById("phone");
 const result = document.getElementById("result");
 const resultPath = document.getElementById("resultPath");
 const debugBox = document.getElementById("debugBox");
+const choiceBox = document.getElementById("choiceBox");
+const btnConnected = document.getElementById("btnConnected");
+const btnNotConnected = document.getElementById("btnNotConnected");
+
+btnConnected.href = INTERNAL_OK_URL + tokenSuffix;
+btnNotConnected.href = EXTERNAL_FALLBACK + tokenSuffix;
 
 function getParam(name){
   const url = new URL(window.location.href);
@@ -396,26 +454,45 @@ function showErrorAndRedirect(){
   }, 160 + SHOW_RESULT_MS);
 }
 
+let left = false;
+window.addEventListener("pagehide", () => {
+  left = true;
+  debugLog("pagehide gefeuert -> left = true");
+});
+
 (async () => {
   debugLog("Warte " + SEARCH_TIME_MS + "ms (Such-Animation)...");
   await new Promise(r => setTimeout(r, SEARCH_TIME_MS));
 
-  const reachable = await testInternalConnection(PING_URL, CHECK_TIMEOUT_MS);
-  debugLog("Ergebnis reachable = " + reachable);
+  debugLog("Versuche Top-Level-Navigation zu: " + INTERNAL_OK_URL + tokenSuffix);
+  window.location.href = INTERNAL_OK_URL + tokenSuffix;
+
+  // Zusätzliche Wartezeit, um der Navigation Zeit zu geben.
+  // Top-Level-Navigation wird NICHT von Mixed-Content-Regeln blockiert
+  // (nur fetch()/img/iframe als Subresourcen sind betroffen) - falls das Ziel
+  // erreichbar ist, sollte die Seite hier längst gewechselt haben.
+  await new Promise(r => setTimeout(r, CHECK_TIMEOUT_MS));
+
+  if (left) {
+    debugLog("left=true -> Navigation lief an, nichts weiter zu tun.");
+    return;
+  }
+
+  debugLog("Nach Wartezeit immer noch auf dieser Seite -> vermutlich nicht erreichbar.");
 
   if (DEBUG) {
-    debugLog("Debug-Modus: Weiterleitung pausiert (5s)...");
-    await new Promise(r => setTimeout(r, 5000));
+    debugLog("Debug-Modus: zeige trotzdem manuelle Auswahl als Sicherheitsnetz.");
+    showManualChoice();
+    return;
   }
 
-  if (reachable) {
-    debugLog("-> Weiterleitung zu INTERNAL_OK_URL");
-    window.location.href = INTERNAL_OK_URL + tokenSuffix;
-  } else {
-    debugLog("-> Weiterleitung zu EXTERNAL_FALLBACK");
-    showErrorAndRedirect();
-  }
+  showErrorAndRedirect();
 })();
+
+function showManualChoice(){
+  phone.classList.add("askChoice");
+  choiceBox.classList.add("show");
+}
 </script>
 </body>
 </html>
