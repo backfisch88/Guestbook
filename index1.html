@@ -183,6 +183,7 @@
     opacity:1;
     transform: scale(1) translateY(0);
     filter: blur(0);
+    pointer-events:auto;
     transition: opacity .65s cubic-bezier(.2,.9,.2,1),
                 transform .65s cubic-bezier(.2,.9,.2,1),
                 filter .65s cubic-bezier(.2,.9,.2,1);
@@ -200,12 +201,15 @@
     display:flex;
     align-items:center;
     justify-content:center;
+    pointer-events:auto;
   }
   .qrImg canvas, .qrImg img{
     width: 100% !important;
     height: 100% !important;
     display:block;
     border-radius: 6px;
+    pointer-events:auto;
+    -webkit-touch-callout: default; /* iOS: Long-Press-Menü nicht unterdrücken */
   }
 
   .qrHint{
@@ -454,12 +458,30 @@
   function renderQrCode(){
     const container = document.getElementById('qrcode');
     container.innerHTML = ""; // vorherigen Inhalt leeren (falls neu gerendert wird)
-    new QRCode(container, {
+
+    // In einen unsichtbaren Zwischen-Container rendern (qrcode.js erzeugt <canvas>)
+    const tempDiv = document.createElement('div');
+    new QRCode(tempDiv, {
       text: buildWifiString(SSID, WIFI_PASSWORD, WIFI_AUTH),
       width: 400,   // hohe interne Aufloesung -> beim Skalieren auf 198px bleibt es scharf
       height: 400,
       correctLevel: QRCode.CorrectLevel.M
     });
+
+    // Canvas -> echtes <img> umwandeln: Safaris Long-Press/Live-Text-Erkennung
+    // ("Netzwerk beitreten") funktioniert bei <img> zuverlässiger als bei <canvas>.
+    setTimeout(() => {
+      const canvas = tempDiv.querySelector('canvas');
+      if (canvas) {
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        img.alt = 'WLAN QR Code';
+        container.appendChild(img);
+      } else {
+        const fallbackImg = tempDiv.querySelector('img');
+        if (fallbackImg) container.appendChild(fallbackImg);
+      }
+    }, 80);
   }
 
   // ---- Token helpers ----
