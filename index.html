@@ -267,6 +267,21 @@ body{
         </svg>
       </div>
     </div>
+
+    <div id="debugBox" style="
+      display:none;
+      position:absolute;
+      left:8px; right:8px; bottom:14px;
+      z-index:9;
+      font-size:11px;
+      line-height:1.4;
+      color:#fff;
+      background:rgba(0,0,0,.55);
+      border-radius:10px;
+      padding:8px 10px;
+      word-break:break-all;
+      font-family:ui-monospace,monospace;
+    "></div>
   </div>
 </div>
 
@@ -301,6 +316,15 @@ const tokenSuffix = getTokenSuffix();
 const phone = document.getElementById("phone");
 const result = document.getElementById("result");
 const resultPath = document.getElementById("resultPath");
+const debugBox = document.getElementById("debugBox");
+
+const DEBUG = new URL(window.location.href).searchParams.get("debug") === "1";
+function debugLog(msg){
+  if (!DEBUG) return;
+  debugBox.style.display = "block";
+  debugBox.textContent += msg + "\n";
+}
+debugLog("PING_URL: " + PING_URL);
 
 // Echter Reachability-Test via Image-Ping statt fetch():
 // fetch()/XHR sind "aktiver" Mixed Content und werden von Safari von einer
@@ -317,10 +341,12 @@ function testInternalConnection(pingUrl, timeoutMs){
   return new Promise((resolve) => {
     let done = false;
     const img = new Image();
+    const started = Date.now();
 
     const timer = setTimeout(() => {
       if (done) return;
       done = true;
+      debugLog("TIMEOUT nach " + (Date.now()-started) + "ms -> false");
       resolve(false);
     }, timeoutMs);
 
@@ -328,17 +354,20 @@ function testInternalConnection(pingUrl, timeoutMs){
       if (done) return;
       done = true;
       clearTimeout(timer);
+      debugLog("onload nach " + (Date.now()-started) + "ms -> true");
       resolve(true);
     };
     img.onerror = () => {
       if (done) return;
       done = true;
       clearTimeout(timer);
+      debugLog("onerror nach " + (Date.now()-started) + "ms -> false");
       resolve(false);
     };
 
-    // Cache-Bust, damit nicht ein gecachtes Ergebnis von letzten Mal zurückkommt
-    img.src = pingUrl + (pingUrl.includes('?') ? '&' : '?') + '_=' + Date.now();
+    const finalUrl = pingUrl + (pingUrl.includes('?') ? '&' : '?') + '_=' + Date.now();
+    debugLog("Starte Ping: " + finalUrl);
+    img.src = finalUrl;
   });
 }
 
@@ -357,16 +386,22 @@ function showErrorAndRedirect(){
 }
 
 (async () => {
-  // kurze Wartezeit, damit die Such-Animation sichtbar bleibt
+  debugLog("Warte " + SEARCH_TIME_MS + "ms (Such-Animation)...");
   await new Promise(r => setTimeout(r, SEARCH_TIME_MS));
 
   const reachable = await testInternalConnection(PING_URL, CHECK_TIMEOUT_MS);
+  debugLog("Ergebnis reachable = " + reachable);
+
+  if (DEBUG) {
+    debugLog("Debug-Modus: Weiterleitung pausiert (5s)...");
+    await new Promise(r => setTimeout(r, 5000));
+  }
 
   if (reachable) {
-    // Im WLAN -> direkt zur internen Seite
+    debugLog("-> Weiterleitung zu INTERNAL_OK_URL");
     window.location.href = INTERNAL_OK_URL + tokenSuffix;
   } else {
-    // Nicht im WLAN -> X anzeigen, dann zum QR-Fallback
+    debugLog("-> Weiterleitung zu EXTERNAL_FALLBACK");
     showErrorAndRedirect();
   }
 })();
