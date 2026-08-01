@@ -318,7 +318,18 @@ const result = document.getElementById("result");
 const resultPath = document.getElementById("resultPath");
 const debugBox = document.getElementById("debugBox");
 
-const DEBUG = new URL(window.location.href).searchParams.get("debug") === "1";
+function getParam(name){
+  const url = new URL(window.location.href);
+  const q = url.searchParams.get(name);
+  if (q !== null) return q;
+
+  const h = (url.hash || "").replace(/^#/, "");
+  if (!h) return null;
+  const hp = new URLSearchParams(h);
+  return hp.get(name);
+}
+
+const DEBUG = getParam("debug") === "1";
 function debugLog(msg){
   if (!DEBUG) return;
   debugBox.style.display = "block";
