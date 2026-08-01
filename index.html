@@ -302,17 +302,43 @@ const phone = document.getElementById("phone");
 const result = document.getElementById("result");
 const resultPath = document.getElementById("resultPath");
 
-// Echter Reachability-Test: schlägt fehl, wenn die interne IP
-// nicht erreichbar ist (z.B. weil man nicht im WLAN ist).
-// mode:'no-cors' reicht, da wir den Inhalt nicht lesen müssen -
-// uns interessiert nur, ob der Request überhaupt durchkommt.
-function testInternalConnection(url, timeoutMs){
+// Echter Reachability-Test via Image-Ping statt fetch():
+// fetch()/XHR sind "aktiver" Mixed Content und werden von Safari von einer
+// HTTPS-Seite zu einem HTTP-Ziel IMMER blockiert (unabhängig von Erreichbarkeit).
+// Ein <img>-Ladeversuch ist "passiver" Mixed Content und wird i.d.R. noch geladen.
+//
+// WICHTIG: PING_URL muss auf eine echte, garantiert vorhandene Bilddatei zeigen
+// (z.B. ein kleines PNG), NICHT auf die HTML-Seite selbst - sonst feuert onerror
+// auch dann, wenn der Server eigentlich erreichbar ist (weil HTML kein gültiges
+// Bildformat ist).
+const PING_URL = "http://192.168.178.10:8082/vis/guestbook/ping.png";
+
+function testInternalConnection(pingUrl, timeoutMs){
   return new Promise((resolve) => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => { controller.abort(); resolve(false); }, timeoutMs);
-    fetch(url, { mode: 'no-cors', cache: 'no-store', signal: controller.signal })
-      .then(() => { clearTimeout(timer); resolve(true); })
-      .catch(() => { clearTimeout(timer); resolve(false); });
+    let done = false;
+    const img = new Image();
+
+    const timer = setTimeout(() => {
+      if (done) return;
+      done = true;
+      resolve(false);
+    }, timeoutMs);
+
+    img.onload = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve(true);
+    };
+    img.onerror = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve(false);
+    };
+
+    // Cache-Bust, damit nicht ein gecachtes Ergebnis von letzten Mal zurückkommt
+    img.src = pingUrl + (pingUrl.includes('?') ? '&' : '?') + '_=' + Date.now();
   });
 }
 
@@ -334,7 +360,7 @@ function showErrorAndRedirect(){
   // kurze Wartezeit, damit die Such-Animation sichtbar bleibt
   await new Promise(r => setTimeout(r, SEARCH_TIME_MS));
 
-  const reachable = await testInternalConnection(INTERNAL_OK_URL + tokenSuffix, CHECK_TIMEOUT_MS);
+  const reachable = await testInternalConnection(PING_URL, CHECK_TIMEOUT_MS);
 
   if (reachable) {
     // Im WLAN -> direkt zur internen Seite
