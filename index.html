@@ -311,7 +311,7 @@ const resultPath = document.getElementById("resultPath");
 // (z.B. ein kleines PNG), NICHT auf die HTML-Seite selbst - sonst feuert onerror
 // auch dann, wenn der Server eigentlich erreichbar ist (weil HTML kein gültiges
 // Bildformat ist).
-const PING_URL = "http://192.168.178.10:8082/vis/guestbook/ping.png";
+const PING_URL = "http://192.168.178.10:8082/vis/guestbook/upload/default.png";
 
 function testInternalConnection(pingUrl, timeoutMs){
   return new Promise((resolve) => {
