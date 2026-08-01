@@ -291,6 +291,7 @@ body{
    ========================== */
 const INTERNAL_OK_URL   = "http://192.168.178.10:8082/vis/guestbook/internal-ok.html";
 const EXTERNAL_FALLBACK = "index1.html";
+const PING_URL = "http://192.168.178.10:8082/vis/guestbook/uploads/default.jpg";
 
 const SEARCH_TIME_MS = 1600;   // Wartezeit fürs "Such"-Gefühl (WiFi-Icon pulsiert)
 const CHECK_TIMEOUT_MS = 1500; // wie lange der eigentliche Connectivity-Test max. dauern darf
@@ -346,7 +347,6 @@ debugLog("PING_URL: " + PING_URL);
 // (z.B. ein kleines PNG), NICHT auf die HTML-Seite selbst - sonst feuert onerror
 // auch dann, wenn der Server eigentlich erreichbar ist (weil HTML kein gültiges
 // Bildformat ist).
-const PING_URL = "http://192.168.178.10:8082/vis/guestbook/uploads/default.jpg";
 
 function testInternalConnection(pingUrl, timeoutMs){
   return new Promise((resolve) => {
